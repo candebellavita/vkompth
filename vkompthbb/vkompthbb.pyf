@@ -1,0 +1,12 @@
+!    -*- f90 -*-
+python module vkompthbb ! in
+    interface  ! in :vkompthbb
+        subroutine vkompthbb(ear,ne,param,ifl,photar,photer) ! in :vkompthbb:vkompthbb.f90
+            real*4 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*4 dimension(10),intent(in) :: param
+            integer intent(in) :: ifl, ne
+            real*4 dimension(ne),intent(out),depend(ne) :: photar
+            real*4 dimension(ne),intent(out),depend(ne) :: photer
+        end subroutine vkompthbb
+    end interface
+end python module vkompthbb

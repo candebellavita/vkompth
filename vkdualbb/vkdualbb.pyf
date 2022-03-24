@@ -1,0 +1,12 @@
+!    -*- f90 -*-
+python module vkdualbb ! in
+    interface  ! in :vkdualbb
+        subroutine vkdualbb(ear,ne,param,ifl,photar,photer) ! in :vkdualbb:vkdualbb.f90
+            real*4 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*4 dimension(17),intent(in) :: param
+            integer intent(in) :: ifl, ne
+            real*4 dimension(ne),intent(out),depend(ne) :: photar
+            real*4 dimension(ne),intent(out),depend(ne) :: photer
+        end subroutine vkdualbb
+    end interface
+end python module vkdualbb
