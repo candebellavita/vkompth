@@ -2,11 +2,10 @@
 
 1) First load HEASOFT (heainit, export, etc...).
 2) Edit the Makefile_libs "lopenblas" to your preferred value
-   (lopenblas, lopenblasp, etc).
+   (lopenblas, lopenblasp, llapack, etc).
 3) Then, run:
 
 ```
-hmake clean
 initpackage vkompthbb lmod_vkompthbb.dat .
 cp Makefile_libs Makefile
 hmake
@@ -16,13 +15,12 @@ We use Makefile_libs to inject all the dependencies of our
 XPEC model with the files on the top dir, and openblas
 library for multithreading.
 
-3) Before running XSPEC, please set your OPENBLAS_NUM_THREADS
+3) Before running XSPEC, please set your `OPENBLAS_NUM_THREADS`
 variable to the amount of threads wanted. Otherwise, it will
 use ALL the threads available, which may interfere with your
 parallel sets under XSPEC.
 
-4) Please edit and use load_vkompth.xcm to load the model into XSPEC
-   together with some hacks to plot fractional rms, and phase lags.
+4) Please edit and use `load_vkompth.xcm` to load the model into XSPEC together with some hacks to plot fractional rms, and phase lags.
 
 5) The model can also be compiled as a python module using .pyf.
 
