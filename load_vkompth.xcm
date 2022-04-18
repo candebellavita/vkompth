@@ -1,0 +1,44 @@
+#
+# User-defined aliases are in $HOME/.xspec/xspec.rc
+#
+# Syntax:
+# interp alias {} <command_alias> {} <xspec_command>
+
+interp alias {} ccp {} "setpl delete all; setpl energy; cpd /xw;"
+
+interp alias {} cpds {} "ccp; setpl com win 2; setplot comm label x Frequency (Hz);
+                              setpl com win 1; setplot com label y Power (rms\\\\u2\\\\d Hz\\\\u-1\\\\d);
+                              setpl com la ti Power Spectrum; pl lda del;"
+
+
+interp alias {} plrl {} "ccp; setpl com win all; setpl com la ti Title; setpl com fo ro;
+                            setpl com cs 1.5; setpl com ma si 2;
+                            setpl com ma 16 on 1 7; setpl com lw 4 on 2 8;
+                         setpl com win 1; setpl com log y on; setpl com r y;
+                            setpl com la y fractional rms; setpl com vi .20 .51 .97 .90;
+                         setpl com win 2; setpl com log y of; setpl com r y; setpl com la t;
+                            setpl com la y phase lag (rad); setpl com vi .20 .11 .97 .50;
+                         setpl com col OFF on 3 4 5 6;
+                            setpl com col 1 on 1 7; setpl com col 2 on 2 8;
+                         pl uf uf;"
+
+interp alias {} plrls {} "ccp; setpl com wi all; setpl com la ti Title; setpl com fo ro;
+                            setpl com cs 1.2; setpl com ma si 2;
+                            setpl com ma 16 on 1 9 17; setpl com lw 4 on 2 10 18;
+                            setpl com win 1; setpl com log y on; setpl com r y;
+                              setpl com lab y fractional rms; setpl com vi .20 .65 .97 .90;
+                            setpl com win 2; setpl com log y of; setpl com r y;
+                              setpl com la t; setpl com lab y lag (rad); setpl com vi .20 .38 .97 .64;
+                            setpl com win 3; setpl com log y on; setpl com r y;
+                              setpl com la t; setplot com label y ph cm\\\\u-2\\\\d s\\\\u-1\\\\d keV\\\\u-1\\\\d;
+                              setpl com vi .20 .11 .97 .37;
+                            setpl com col OFF on 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18;
+                              setpl com col 1 on 1 9 17; setpl com col 2 on 2 10 18;
+                            pl uf uf uf;"
+
+# Definition of local models associated to vKompth
+
+lmod vkompthbb /PATHTO/vkompth/vkompthbb
+lmod vkompthdk /PATHTO/vkompth/vkompthdk
+lmod vkdualdk  /PATHTO/vkompth/vkdualdk
+lmod vkdualbb  /PATHTO/vkompth/vkdualbb

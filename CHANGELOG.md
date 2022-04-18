@@ -1,3 +1,10 @@
+Version 1.0.1
+=============
+
+Updated guidelines in `README.md` files for installation.
+
+Added `load_vkompth.xcm` XSPEC script to ease loading the
+models and making quick pre-formatted plots.
 
 Version 1.0.0
 =============
