@@ -4,32 +4,45 @@ This is the Fortran version of the [vKompth](https://github.com/candebellavita/v
 *Bellavita et al. 2022 (subm. to MNRAS)* which was originally
 developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/abstract) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/abstract).
 
-In order to invert the matrix of the linear problem, `vKompth` requires `dgtsv` routine from the [Lapack](https://www.netlib.org/lapack) or [openBLAS]([https://www.openblas.net/) libraries which have to be installed in your system. Before compiling the code, first check `lopenblas` choice under `LDFLAGS` variable in the `Makefile` (and change it to `lopenblas`, `lopenblasp`, `llapack`, according to your system).
+In order to invert the matrix of the linear problem, `vKompth` requires the `dgtsv` routine from the [Lapack](https://www.netlib.org/lapack) or [openBLAS]([https://www.openblas.net/) libraries, which have to be installed in your system. Before compiling the code check the `lopenblas` choice under the `LDFLAGS` variable in the `Makefile` and change it to `lopenblas`, `lopenblasp` or `llapack`, depending the one you have installed in your system.
 
-Then, run `make` to compile the `vKompth` source code.
+Make sure you have HEASOFT installed and set up.
 
-Alternative, to manually compile the code, use:
+Then, run `make` to compile the main program `vKompth` source code.
+
+Alternatively, to manually compile the code, use:
 ```
 gfortran -O5 -Wall dependencies/*f sco_simpson.f90 sco_mppinv.f90 sco_model.f90 sco_band_integration.f90 sco_par.f90 sco_arrays.f90 sco_global.f90 sco_program.f90 -lopenblas -o scorpio_fortran
 ```
 replacing `lopenblas` by the appropriate library for your system.
 
-To run `vKompth` in multithread mode, use, for instance:
+We tested and it worked with version 9 of the compiler (this is also the version needed to compile the latest HEASOFT), but it may not work with older versions (we tested that it did not work with v4). Read the HEASOFT pages about compilers. 
+
+To run `vKompth` in multithread mode use, for instance:
 ```
-export OPENBLAS_NUM_THREADS=2
+export OPENBLAS_NUM_THREADS=2 (bash version)
+setenv OPENBLAS_NUM_THREADS 2 (cshell version)
 ```
 
-To compile the XSPEC wrappers, enter to each wrapper subdirectory and, after loading HEASOFT, run `initpackage` and `hmake` as follows:
+You will now need to compile the different versions of the program (the so-called wrappers); the names of the subdirectories indicate the type of wrapper model: bb=blackbody seed-photon source; dk=diskbb seed-photon source; dual=2 coronas.
+
+To compile the XSPEC wrappers, go to each wrapper subdirectory and, after loading HEASOFT, run `initpackage` and `hmake`. For instance:
 ```
 cd vkompthbb
+```
+Please, check and manually edit `Makefile_libs` to match the corresponding `lopenblas` value for your system if necessary. Then run:
+
+```
 initpackage vkompthbb lmod_vkompthbb.dat  . ; cp Makefile_libs Makefile; hmake
 ```
-Please, first check and manually edit `Makefile_libs` to match the corresponding `lopenblas` value for your system.
+
+Follow similar steps for the other wrappers.
 
 In an XSPEC session, `vkompthbb` can be then loaded using:
 ```
 lmod vkompthbb /PATHTO/vkompthbb/
 ```
+(and similar commands for the other wrappers).
 
 For questions, comments and issues, please contact the
 authors of *Bellavita et al. 2022 (subm. to MNRAS)* preferably through the [vKompth GitHub](https://github.com/candebellavita/vkompth).
