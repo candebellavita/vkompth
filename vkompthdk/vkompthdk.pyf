@@ -2,11 +2,11 @@
 python module vkompthdk ! in
     interface  ! in :vkompthdk
         subroutine vkompthdk(ear,ne,param,ifl,photar,photer) ! in :vkompthdk:vkompthdk.f90
-            real*4 dimension(ne + 1),intent(in),depend(ne) :: ear
-            real*4 dimension(10),intent(in) :: param
+            real*8 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*8 dimension(8),intent(in) :: param
             integer intent(in) :: ifl, ne
-            real*4 dimension(ne),intent(out),depend(ne) :: photar
-            real*4 dimension(ne),intent(out),depend(ne) :: photer
+            real*8 dimension(ne),intent(out),depend(ne) :: photar
+            real*8 dimension(ne),intent(out),depend(ne) :: photer
         end subroutine vkompthdk
     end interface
 end python module vkompthdk

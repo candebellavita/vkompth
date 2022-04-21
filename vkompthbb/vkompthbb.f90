@@ -1,14 +1,15 @@
 SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     IMPLICIT NONE
-    INTEGER ifl,ne,mesh_size,i,j, ENEMAX, MAXNE, mode, neRef
+    INTEGER ifl, ne, mesh_size, ENEMAX, MAXNE
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000)
 
-    REAL ear(0:ne), param(10), photar(ne), photer(ne), reflag
+    DOUBLE PRECISION :: ear(0:ne), param(8), photar(ne), photer(ne)
+    LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    REAL, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
-    REAL, save :: pkTs, pkTe, pgam, psize, peta_frac, pqpo_freq, paf, pDHext, pear(0:MAXNE)
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: pkTs, pkTe, pgam, psize, peta_frac, pqpo_freq, paf, pDHext, pear(0:MAXNE)
 
-    DOUBLE PRECISION af, Lsize, kTe, kTs, gam
+    DOUBLE PRECISION :: af, Lsize, kTe, kTs, gam, reflag, sss_norm
     DOUBLE PRECISION :: disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4)
@@ -16,37 +17,65 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
 
     character*(128) dTemod,dTsmod,pdTemod,pdTsmod
 
-    INTEGER Nsss, Nreal, Nimag, dim_int
-    DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
+
+    INTEGER Nsss, Nreal, Nimag, dim_int, i, j, mode, neRef, ier
+    DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
+    DOUBLE PRECISION :: SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     LOGICAL samecall
 
-    DATA pdTemod,pdTsmod/'dTe_mod','dTs_mod'/
+    REAL DGFILT
+    LOGICAL :: DGQFLT
+!    INTEGER :: DGNFLT
 
+    DATA pdTemod,pdTsmod/'dTe_mod','dTs_mod'/
+    DATA firstcall/.true./
     !This model does not return model variances.
     photer = 0
 
-    IF (ne.gt.MAXNE) THEN
-        write(*,*) 'energies must be shorter than ', MAXNE
-        write(*,*) 'please recompile the module with a larger MAXNE'
-        photar = 0
-        return
-    END IF
+    !Header
+    if(firstcall)then
+        write(*,*) '   ====================================================================='
+        write(*,*) '    This is vKompth, the time-dependent Comptonization model from'
+        write(*,*) '    Bellavita, Garcia, Mendez and Karpouzas (2022) and Karpouzas+(2020).'
+        write(*,*) '    Please cite these papers if you use this model in your publications.'
+        write(*,*) '    Feel free to contact us through email or vKompth GitHub page.'
+        write(*,*) '   ====================================================================='
+        write(*,*) '       Units: rms in fractional units. lags in radians.'
+        write(*,*) '       Important: rms and lags normalizations must be fixed to unity.'
+        write(*,*) '   ====================================================================='
+        firstcall=.false.
 
-    !mode parameter (1:rms; 2:plag; 3:sss; 4:real; 5:imag)
-    mode = int(param(9))
-    IF (mode.gt.5) THEN
-        WRITE(*,*) 'Warning: parameter MODE should be between 1 and 5.'
-        mode = 5
-    ELSE IF (mode.lt.1) THEN
-        WRITE(*,*) 'Warning: parameter MODE should be between 1 and 5.'
-        mode = 1
-    ENDIF
-    reflag = param(10)
+        IF (ne.gt.MAXNE) THEN
+          write(*,*) '    ERROR: energies must be shorter than ', MAXNE
+          write(*,*) '    please recompile the module with a larger MAXNE'
+          photar = 0
+          return
+        END IF
+
+        !mode parameter (1:rms; 2:plag; 3:sss; 4:real; 5:imag)
+        IF(.not.DGQFLT(ifl, 'mode')) THEN
+          write(*,*) '    WARNING: Spectrum ', IFL, 'lacks mode value in header.'
+          write(*,*) '             Assuming time-averaged spectrum (mode=0).'
+          return
+        ELSE IF(.not.DGQFLT(ifl, 'QPO')) THEN
+          write(*,*) '    WARNING: Spectrum ', IFL, 'lacks QPO value in header'
+          write(*,*) '             Assuming time-averaged spectrum (mode=0).'
+          return
+        ENDIF
+
+        write(*,*) '     QPO frequency = ', DGFILT(ifl, 'QPO'), ' Hz'
+        write(*,*) '   ======================================================='
+    end if
+
+    mode = int(DGFILT(ifl, 'mode'))
+    if ((mode.lt.0.99).OR.(mode.gt.5.01)) mode=0
+    reflag = param(8)
+    qpo_freq = DGFILT(ifl, 'QPO')
+
     samecall = .FALSE.
-
     IF (pkTs.eq.param(1).and.pkTe.eq.param(2).and.pgam.eq.param(3).and.psize.eq.param(4).and. &
-        peta_frac.eq.param(5).and.pqpo_freq.eq.param(6).and.paf.eq.param(7).and. &
-        pDHext.eq.param(8).and.pne.eq.ne) then
+        peta_frac.eq.param(5).and.pqpo_freq.eq.qpo_freq.and.paf.eq.param(6).and. &
+        pDHext.eq.param(7).and.pne.eq.ne) then
         i=0
         DO WHILE (ear(i).eq.pear(i).and.i.le.ne)
             i=i+1
@@ -65,7 +94,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
                 !write(*,*) 'Lags...'
                 photar = photlags(1:ne)+reflag*(ear(1:ne)-ear(0:ne-1))
                 return
-            else if (ifl.eq.3) then
+            else if (mode.eq.3.or.mode.eq.0) then
                 !write(*,*) 'SSS...'
                 photar = photsss(1:ne)
                 return
@@ -88,19 +117,17 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     pgam = param(3)
     psize = param(4)
     peta_frac = param(5)
-    pqpo_freq = param(6)
-    paf = param(7)
-    pDHext = param(8)
-    !write(*,*) pkTs, pkTe, ptau, psize, peta_frac, pqpo_freq, paf, pDHext
+    pqpo_freq = qpo_freq
+    paf = param(6)
+    pDHext = param(7)
 
     kTs = param(1)
     kTe = param(2)
     gam = param(3)
     Lsize = param(4)
     eta_frac = param(5)
-    qpo_freq = param(6)
-    af = param(7)
-    DHext = param(8)
+    af = param(6)
+    DHext = param(7)
 
     disk_size = af
     corona_size = Lsize
@@ -135,11 +162,17 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
         CALL sco_band_integrated_amplitude(neRef,bwRef,dim_int, Nsss, Tsss, Ssss, Nreal, Treal, Sreal, Nimag, Timag, Simag, &
             fracrms, plag_scaled, SSS_band,Re_band, Im_band)
 
-        photrms = real(fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1)))
-        photlags = real(plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1)))
-        photsss = real(SSS_band(2:ne+1))
-        photreal = real(Re_band(2:ne+1))
-        photimag = real(Im_band(2:ne+1))
+        IF (mode.eq.0) THEN
+          CALL sco_splev(Tsss,Nsss,Ssss,3,1.D0,sss_norm,1,ier)
+        ELSE
+          sss_norm = 1.D0
+        ENDIF
+
+        photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+        photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+        photsss = SSS_band(2:ne+1)/sss_norm
+        photreal = Re_band(2:ne+1)/sss_norm
+        photimag = Im_band(2:ne+1)/sss_norm
     ELSE
         write(*,*) 'energies is longer than ', ENEMAX, ' so I will round it'
         neRef = ENEMAX
@@ -154,14 +187,20 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
         CALL sco_band_integrated_amplitude(neRef,bwRef,dim_int, Nsss, Tsss, Ssss, Nreal, Treal, Sreal, Nimag, Timag, Simag, &
             fracrms, plag_scaled, SSS_band,Re_band, Im_band)
 
+        IF (mode.eq.0) THEN
+          CALL sco_splev(Tsss,Nsss,Ssss,3,1.D0,sss_norm,1,ier)
+        ELSE
+          sss_norm = 1.D0
+        ENDIF
+
         DO I = 1, ne
             DO J = 2, ENEMAX-1
                 IF (ear(I) .LE. bwRef(J, 2) .AND. ear(I) .GE. bwRef(J, 1)) THEN
-                    photrms(i) = real(fracrms(J)*(ear(I)-ear(I-1)))
-                    photlags(i) = real(plag_scaled(J)*(ear(I)-ear(I-1)))
-                    photsss(i) = real(SSS_band(J))
-                    photreal(i) = real(Re_band(J))
-                    photimag(i) = real(Im_band(J))
+                    photrms(i) = fracrms(J)*(ear(I)-ear(I-1))
+                    photlags(i) = plag_scaled(J)*(ear(I)-ear(I-1))
+                    photsss(i) = SSS_band(J)/sss_norm
+                    photreal(i) = Re_band(J)/sss_norm
+                    photimag(i) = Im_band(J)/sss_norm
                 END IF
             END DO
         END DO
@@ -173,7 +212,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     else if (mode.eq.2) then
         photar = photlags(1:ne)+reflag*(ear(1:ne)-ear(0:ne-1))
         return
-    else if (mode.eq.3) then
+    else if (mode.eq.3.or.mode.eq.0) then
         photar = photsss(1:ne)
         return
     else if (mode.eq.4) then
