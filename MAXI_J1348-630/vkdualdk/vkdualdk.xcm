@@ -1,7 +1,8 @@
 statistic chi
-data 1:1 NICER_rms_phil.pha
-
+data 1:1 NICER_rms_dil.pha
+resp 1 NICER_rms_dil.rmf
 data 2:2 NICER_lag.pha
+resp 2 NICER_lag.rmf
 ignore 1:17 2:17
 
 method leven 10000 0.01
@@ -26,12 +27,10 @@ model  vkdualdk
         10919.4          1        0.1        0.1     200000     200000
        0.989868          1          0          0          1          1
        0.274298          1          0          0          1          1
-           4.55         -1      0.001      0.001       2000       2000
             250         -1        0.1        0.1       1000       1000
        0.227957       0.01          0          0       1000       1000
        0.195634       0.01          0          0       1000       1000
         3.00963       0.01       -6.4       -6.4        6.4        6.4
-              1         -1          1          1          5          5
        0.144497        6.4       -3.2       -3.2        3.2        3.2
               1         -1          0          0      1e+20      1e+24
 = p1
@@ -49,7 +48,5 @@ model  vkdualdk
 = p13
 = p14
 = p15
-              2         -1          1          1          5          5
-= p17
-              1         -1          0          0      1e+20      1e+24
+= p16
 bayes off

@@ -1,7 +1,8 @@
 statistic chi
 data 1:1 NICER_rms_dil.pha
-
+resp 1 NICER_rms_dil.rmf
 data 2:2 NICER_lag.pha
+resp 2 NICER_lag.rmf
 
 method leven 10 0.01
 abund angr
@@ -18,10 +19,8 @@ model  vkompthdk
             3.5         -1       1.01       1.01          5          5
         11213.2        100        0.1        0.1     200000     200000
        0.365578        0.1          0          0          1          1
-           4.55         -1      0.001      0.001       2000       2000
             250         -1        0.1        0.1       1000       1000
        0.129139       0.01          0          0       1000       1000
-              1         -1          1          1          5          5
        0.122201          1       -3.2       -3.2        3.2        3.2
               1         -1          0          0      1e+20      1e+24
 = p1
@@ -32,7 +31,5 @@ model  vkompthdk
 = p6
 = p7
 = p8
-              2         -1          1          1          5          5
-= p10
-= p11
+= p9
 bayes off
