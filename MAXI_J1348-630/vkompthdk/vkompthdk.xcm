@@ -1,7 +1,8 @@
 statistic chi
 data 1:1 NICER_rms_dil.pha
-
+resp 1 NICER_rms_dil.rmf
 data 2:2 NICER_lag.pha
+resp 2 NICER_lag.rmf
 
 method leven 10 0.01
 abund angr
