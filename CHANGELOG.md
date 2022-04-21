@@ -8,7 +8,11 @@ For this purpose, `asciiTOvkompth.sh` was added to help
 creatings FITS PHA and RMF files from ASCII files containing
 rms and lag data.
 
-Note that each version of the model now has 2 parameters less.
+Note that each version of the model now has 2 parameters less,
+thus `xcm` model files are not backwards/forward compatible.
+
+vKompth now prints a message indicating the model version
+when first loaded in an XSPEC sesion.
 
 
 Version 1.0.1

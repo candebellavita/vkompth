@@ -16,7 +16,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
 
     character*(128) dTemod,dTsmod,pdTemod,pdTsmod
-
+    character*(16) VERSION
 
     INTEGER Nsss, Nreal, Nimag, dim_int, i, j, mode, neRef, ier
     DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
@@ -34,8 +34,12 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
 
     !Header
     if(firstcall)then
+        OPEN(UNIT=100,FILE='../VERSION',STATUS='OLD')
+        READ(100,*) VERSION
+        CLOSE(100)
+
         write(*,*) '   ====================================================================='
-        write(*,*) '    This is vKompth, the time-dependent Comptonization model from'
+        write(*,*) '    This is vKompth ',trim(VERSION),' time-dependent Comptonization model'
         write(*,*) '    Bellavita, Garcia, Mendez and Karpouzas (2022) and Karpouzas+(2020).'
         write(*,*) '    Please cite these papers if you use this model in your publications.'
         write(*,*) '    Feel free to contact us through email or vKompth GitHub page.'

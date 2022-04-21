@@ -41,16 +41,16 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 
 all: vkompth_lin vkompth_log vkompth_bb vkompth_dk
 
-sco_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
+vkompth_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_LIN) $(LDFLAGS) -o $@
 
-sco_log: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
+vkompth_log: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_LOG) $(LDFLAGS) -o $@
 
-sco_log_BB: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
+vkompth_bb: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_BB) $(LDFLAGS) -o $@
 
-sco_log_diskBB: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
+vkompth_dk: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_DISKBB) $(LDFLAGS) -o $@
 
 .PHONY: clean
