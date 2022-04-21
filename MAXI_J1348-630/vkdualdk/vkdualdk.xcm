@@ -1,8 +1,8 @@
 statistic chi
 data 1:1 NICER_rms_dil.pha
-resp 1 NICER_rms_dil.pha
+resp 1 NICER_rms_dil.rmf
 data 2:2 NICER_lag.pha
-resp 2 NICER_lag.pha
+resp 2 NICER_lag.rmf
 ignore 1:17 2:17
 
 method leven 10000 0.01
