@@ -39,7 +39,7 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #./%.mod: ./%.f90
 #	$(FC) $(FCFLAGS) -c $<
 
-all: sco_lin sco_log sco_log_BB sco_log_diskBB
+all: vkompth_lin vkompth_log vkompth_bb vkompth_dk
 
 sco_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_LIN) $(LDFLAGS) -o $@
@@ -55,4 +55,4 @@ sco_log_diskBB: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 
 .PHONY: clean
 clean:
-	-rm -f $(DEPSDIR)/*.o *.o *.mod sco_log sco_log_BB sco_log_diskBB sco_lin
+	-rm -f $(DEPSDIR)/*.o *.o *.mod vkompth_lin vkompth_log vkompth_bb vkompth_dk

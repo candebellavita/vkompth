@@ -7,7 +7,7 @@ This is the Fortran version of the [vKompth](https://github.com/candebellavita/v
 
 In order to invert the matrix of the linear problem, `vKompth` requires the `DGTSV`, `ZGETRF` and `ZGETRS` routines from the [Lapack](https://www.netlib.org/lapack) or [openBLAS](https://www.openblas.net/) libraries, which have to be installed in your system. Before compiling the code check the `lopenblas` choice under the `LDFLAGS` variable in the `Makefile` and change it to `lopenblas`, `lopenblasp` or `llapack`, depending the one you have installed in your system.
 
-Make sure you have [HEASOFT](https://heasarc.gsfc.nasa.gov/lheasoft/) installed and set up before compiling the XSPEC models.
+Make sure you have [HEASOFT](https://heasarc.gsfc.nasa.gov/lheasoft/) installed from the source version, and set it up before compiling the XSPEC models. This model has to be compiled with the same compiler version used for HEASOFT to ensure compatibility. Read the HEASOFT pages about compilers.
 
 
 ## Compile the code
@@ -16,11 +16,9 @@ Run `make` to compile the main program `vKompth` source code.
 
 Alternatively, to manually compile the code, use, for instance:
 ```
-gfortran -O5 -Wall dependencies/*f sco_simpson.f90 sco_mppinv.f90 sco_model.f90 sco_band_integration.f90 sco_par.f90 sco_arrays.f90 sco_global.f90 sco_programLOG.f90 -lopenblas -o vkompthbb
+gfortran -O5 -Wall dependencies/*f sco_simpson.f90 sco_mppinv.f90 sco_model.f90 sco_band_integration.f90 sco_par.f90 sco_arrays.f90 sco_global.f90 sco_programDSKB.f90 -lopenblas -o vkompth_dk
 ```
 replacing `lopenblas` by the appropriate library for your system.
-
-We tested and it worked with version 9 of the compiler (this is also the version needed to compile the latest HEASOFT), but it may not work with older versions (we tested that it did not work with version 4). Read the HEASOFT pages about compilers. 
 
 To run `vKompth` in multithread mode use, for instance:
 ```
