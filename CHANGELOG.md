@@ -14,8 +14,11 @@ thus `xcm` model files are not backwards/forward compatible.
 vKompth now prints a message indicating the model version
 when first loaded in an XSPEC sesion.
 
-Makefile is now able to fully compile both VKOMPTH model and
-XSPEC wrappers when HEASOFT is loaded.
+Added a Python Interactive-Plot wrapper: `pyvkompth`
+
+Makefile is now able to fully compile both VKOMPTH model,
+python interactive-plot wrapper, and XSPEC wrappers when
+HEASOFT is loaded.
 
 
 Version 1.0.1
