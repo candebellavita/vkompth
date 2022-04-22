@@ -5,7 +5,6 @@ USE iso_fortran_env, ONLY : WP => REAL64
     REAL, PARAMETER :: PI = 4.0 * ATAN(1.0)
     INTEGER, PARAMETER :: mesh_size = 2999 , meshlog = 299
 
-
 CONTAINS
 SUBROUTINE sco_constants(dist, mass, time, energy_norm,  eV2J, keV2J, MeV2J, J2keV, Etrans, kbol, hplanck, c, cc2, me, sigma, stau)
 USE iso_fortran_env, ONLY : WP => REAL64
@@ -46,17 +45,3 @@ USE iso_fortran_env, ONLY : WP => REAL64
 END SUBROUTINE sco_constants
 
 ENDMODULE sco_global
-
-
-
-!CHEQUEAR PQ NO LO ENTIENDO
-!SUBROUTINE input_control(x, bandwidth, band_number, dx)
-!   REAL(DP) dx, bandwidth
-
-!   bandwidth(start_keV,end_keV) = end_keV - start_keV
-
-!   IF (dx.GT.0.9) THEN WRITE(*,*) 'PROBLEM : The step size is too small. Increase the number of mesh points'
-!   IF bandwidth
-
-!bandwidth: 2d array with 2 colums. each line contains the start and stop of the band in keV
-!ENDSUBROUTINE input_control

@@ -39,7 +39,17 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #./%.mod: ./%.f90
 #	$(FC) $(FCFLAGS) -c $<
 
-all: vkompth_lin vkompth_log vkompth_bb vkompth_dk
+
+all: version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk
+
+model: vkompth_lin vkompth_log vkompth_bb vkompth_dk
+
+wrappers: version vkompthbb vkompthdk vkdualbb vkdualdk
+
+version:
+	@echo "\nApply VERSION number to XSPEC model wrappers...\n"
+	sed -i s/VERSION/$$(cat VERSION)/g */*.f90
+	@echo "\n   ... Done.\n\n"
 
 vkompth_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_LIN) $(LDFLAGS) -o $@
@@ -53,6 +63,22 @@ vkompth_bb: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 vkompth_dk: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(TARGET_ARCH) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_DISKBB) $(LDFLAGS) -o $@
 
-.PHONY: clean
+vkompthbb:
+	cd vkompthbb; initpackage vkompthbb lmod_vkompthbb.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+
+vkompthdk:
+	cd vkompthdk; initpackage vkompthdk lmod_vkompthdk.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+
+vkdualbb:
+	cd vkdualbb; initpackage vkdualbb lmod_vkdualbb.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+
+vkdualdk:
+	cd vkdualdk; initpackage vkdualdk lmod_vkdualdk.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+
+
+.PHONY: clean vkompthbb vkompthdk vkdualbb vkdualdk model wrappers version
 clean:
-	-rm -f $(DEPSDIR)/*.o *.o *.mod vkompth_lin vkompth_log vkompth_bb vkompth_dk
+	-rm -f $(DEPSDIR)/*.o *.o *.mod vkompth_lin vkompth_log vkompth_bb vkompth_dk; \
+	cd vkompthbb; hmake clean; cd ..; cd vkompthdk; hmake clean; cd ..; \
+	cd vkdualbb; hmake clean;	cd ..; cd vkdualdk; hmake clean; cd ..; \
+	echo '\n\n   FINISHED make clean all. Ready to re-compile using make. \n'
