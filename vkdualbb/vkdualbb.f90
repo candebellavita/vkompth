@@ -1,17 +1,18 @@
 SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     IMPLICIT NONE
-    INTEGER ifl,ne,mesh_size,i,j, ENEMAX, MAXNE, mode, neRef, NX, nestsol
+    INTEGER ifl,ne,mesh_size,i,ENEMAX, MAXNE, mode, neRef, NX, nestsol, ier
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000, NX=299)
 
-    REAL ear(0:ne), param(17), photar(ne), photer(ne), reflag
+    DOUBLE PRECISION ear(0:ne), param(15), photar(ne), photer(ne)
+    LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    REAL, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
-    REAL, save :: pkTs1, pkTe1, pgam1, pLsize1, peta1, pqpo_freq, paf, pDHext1, pear(0:MAXNE)
-    REAL, save :: pkTs2, pkTe2, pgam2, pLsize2, peta2, pDHext2, pphi
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: pkTs1, pkTe1, pgam1, pLsize1, peta1, pqpo_freq, paf, pDHext1, pear(0:MAXNE)
+    DOUBLE PRECISION, save :: pkTs2, pkTe2, pgam2, pLsize2, peta2, pDHext2, pphi
 
     DOUBLE PRECISION Lsize1, kTe1, kTs1, gam1, eta1, DHext1
     DOUBLE PRECISION Lsize2, kTe2, kTs2, gam2, eta2, DHext2
-    DOUBLE PRECISION :: tau, qpo_freq, phi, af
+    DOUBLE PRECISION :: tau, qpo_freq, phi, af, reflag, sss_norm
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX)
     DOUBLE PRECISION :: Xmin, Xmax
@@ -22,7 +23,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod
 
     INTEGER Nsss, Nreal, Nimag, dim_int
-    DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), plag(ne+1)
+    DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
     DOUBLE PRECISION bwX(NX, 2), fracrmsT(NX), plag_scaledT(NX)
     DOUBLE PRECISION SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     DOUBLE PRECISION SSS_band1(NX), Re_band1(NX), Im_band1(NX)
@@ -32,37 +33,65 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
 
     LOGICAL samecall
 
+    REAL DGFILT
+    LOGICAL :: DGQFLT
+!    INTEGER :: DGNFLT
+
     DATA pdTe1mod,pdTs1mod/'dTe1_mod','dTs1_mod'/
     DATA pdTe2mod,pdTs2mod/'dTe2_mod','dTs2_mod'/
+    DATA firstcall/.true./
 
     cj = (0.0,1.0)
 
     !This model does not return model variances.
     photer = 0
 
-    IF (ne.gt.MAXNE) THEN
-        write(*,*) 'energies must be shorter than ', MAXNE
-        write(*,*) 'please recompile the module with a larger MAXNE'
-        photar = 0
-        return
-    END IF
+    !Header
+    if(firstcall)then
+        write(*,*) '   ====================================================================='
+        write(*,*) '    This is vKompth VERSION the time-dependent Comptonization model'
+        write(*,*) '                from Bellavita, Garcia, Mendez & Karpouzas (2022).'
+        write(*,*) '    Original models: Karpouzas+(2020) and Garcia+(2021).'
+        write(*,*) '    Please cite these papers if you use this model in your publications.'
+        write(*,*) '    Feel free to contact us through email or vKompth GitHub page.'
+        write(*,*) '   ====================================================================='
+        write(*,*) '       Units: rms in fractional units. lags in radians.'
+        write(*,*) '       Important: rms and lags normalizations must be fixed to unity.'
+        write(*,*) '   ====================================================================='
+        firstcall=.false.
 
-    !mode parameter (1:rms; 2:plag; 3:sss; 4:real; 5:imag)
-    mode = int(param(16))
-    IF (mode.gt.5) THEN
-        WRITE(*,*) 'Warning: parameter MODE should be between 1 and 5.'
-        mode = 5
-    ELSE IF (mode.lt.1) THEN
-        WRITE(*,*) 'Warning: parameter MODE should be between 1 and 5.'
-        mode = 1
-    ENDIF
-    reflag = param(17)
+        IF (ne.gt.MAXNE) THEN
+          write(*,*) '    ERROR: energies must be shorter than ', MAXNE
+          write(*,*) '    please recompile the module with a larger MAXNE'
+          photar = 0
+          return
+        END IF
+
+        !mode parameter (1:rms; 2:plag; 3:sss; 4:real; 5:imag)
+        IF(.not.DGQFLT(ifl, 'mode')) THEN
+          write(*,*) '    WARNING: Spectrum ', IFL, 'lacks mode value in header.'
+          write(*,*) '             Assuming time-averaged spectrum (mode=0).'
+          return
+        ELSE IF(.not.DGQFLT(ifl, 'QPO')) THEN
+          write(*,*) '    WARNING: Spectrum ', IFL, 'lacks QPO value in header'
+          write(*,*) '             Assuming time-averaged spectrum (mode=0).'
+          return
+        ENDIF
+
+        write(*,*) '     QPO frequency = ', DGFILT(ifl, 'QPO'), ' Hz'
+        write(*,*) '   ====================================================================='
+    end if
+
+    mode = int(DGFILT(ifl, 'mode'))
+    if ((mode.lt.0.99).OR.(mode.gt.5.01)) mode=0
+    reflag = param(15)
+    qpo_freq = DGFILT(ifl, 'QPO')
     samecall = .FALSE.
 
     IF (pkTs1.eq.param(1).and.pkTs2.eq.param(2).and.pkTe1.eq.param(3).and.pkTe2.eq.param(4).and. &
         pgam1.eq.param(5).and.pgam2.eq.param(6).and.pLsize1.eq.param(7).and.pLsize2.eq.param(8).and. &
-        peta1.eq.param(9).and.peta2.eq.param(10).and.pqpo_freq.eq.param(11).and. &
-        paf.eq.param(12).and.pDHext1.eq.param(13).and.pDHext2.eq.param(14).and.pphi.eq.param(15).and.&
+        peta1.eq.param(9).and.peta2.eq.param(10).and. &
+        paf.eq.param(11).and.pDHext1.eq.param(12).and.pDHext2.eq.param(13).and.pphi.eq.param(14).and.&
         pne.eq.ne) then
         i=0
         DO WHILE (ear(i).eq.pear(i).and.i.le.ne)
@@ -82,7 +111,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
                 !write(*,*) 'Lags...'
                 photar = photlags(1:ne)+reflag*(ear(1:ne)-ear(0:ne-1))
                 return
-            else if (ifl.eq.3) then
+            else if (mode.eq.3.or.mode.eq.0) then
                 !write(*,*) 'SSS...'
                 photar = photsss(1:ne)
                 return
@@ -110,11 +139,11 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     pLsize2 = param(8)
     peta1 = param(9)
     peta2 = param(10)
-    pqpo_freq = param(11)
-    paf = param(12)
-    pDHext1 = param(13)
-    pDHext2 = param(14)
-    pphi = param(15)
+    paf = param(11)
+    pDHext1 = param(12)
+    pDHext2 = param(13)
+    pphi = param(14)
+    pqpo_freq = qpo_freq
 
     kTs1 = param(1)
     kTs2 = param(2)
@@ -126,11 +155,11 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     Lsize2 = param(8)
     eta1 = param(9)
     eta2 = param(10)
-    qpo_freq = param(11)
-    af = param(12)
-    DHext1 = param(13)
-    DHext2 = param(14)
-    phi = param(15)
+    af = param(11)
+    DHext1 = param(12)
+    DHext2 = param(13)
+    phi = param(14)
+    qpo_freq = pqpo_freq
 
     ! If gamma<0 then, it is -tau. Otherwise, we get tau from kTe and gamma.
     if (gam1.lt.0) then
@@ -178,11 +207,11 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     Lsize2 = param(8)
     eta1 = param(9)
     eta2 = param(10)
-    qpo_freq = param(11)
-    af = param(12)
-    DHext1 = param(13)
-    DHext2 = param(14)
-    phi = param(15)
+    af = param(11)
+    DHext1 = param(12)
+    DHext2 = param(13)
+    phi = param(14)
+    qpo_freq = pqpo_freq
 
     ! If gamma<0 then, it is -tau. Otherwise, we get tau from kTe and gamma.
     if (gam2.lt.0) then
@@ -239,16 +268,23 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
         CALL sco_band_integrated_amplitude(neRef,bwRef,dim_int, Nsss, Tsss, Ssss, Nreal, Treal, &
                     Sreal, Nimag, Timag, Simag, fracrms, plag_scaled, SSS_band,Re_band, Im_band)
 
+
+        IF (mode.eq.0) THEN
+            CALL sco_splev(Tsss,Nsss,Ssss,3,1.D0,sss_norm,1,ier)
+        ELSE
+            sss_norm = 1.D0
+        ENDIF
+
     ELSE
       write(*,*) 'energies is longer than ', ENEMAX
       write(*,*) 'please recompile using a larger ENEMAX'
     ENDIF
 
-    photrms = real(fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1)))
-    photlags = real(plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1)))
-    photsss = real(SSS_band(2:ne+1))
-    photreal = real(Re_band(2:ne+1))
-    photimag = real(Im_band(2:ne+1))
+    photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+    photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+    photsss = SSS_band(2:ne+1)/sss_norm
+    photreal = Re_band(2:ne+1)/sss_norm
+    photimag = Im_band(2:ne+1)/sss_norm
 
 
     if (mode.eq.1) then
@@ -257,7 +293,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     else if (mode.eq.2) then
         photar = photlags(1:ne)+reflag*(ear(1:ne)-ear(0:ne-1))
         return
-    else if (mode.eq.3) then
+    else if (mode.eq.3.or.mode.eq.0) then
         photar = photsss(1:ne)
         return
     else if (mode.eq.4) then
