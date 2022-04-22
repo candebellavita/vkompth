@@ -40,11 +40,16 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #	$(FC) $(FCFLAGS) -c $<
 
 
-all: version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk
+all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk
 
 model: vkompth_lin vkompth_log vkompth_bb vkompth_dk
 
-wrappers: version vkompthbb vkompthdk vkdualbb vkdualdk
+wrappers: loader version vkompthbb vkompthdk vkdualbb vkdualdk
+
+loader:
+	@echo "\nApply PATHTO to load_vkompth.xcm...\n"
+	sed -i "s|/PATHTO|$$(pwd)|g" load_vkompth.xcm
+	@echo "\n   ... Done.\n\n"
 
 version:
 	@echo "\nApply VERSION number to XSPEC model wrappers...\n"
