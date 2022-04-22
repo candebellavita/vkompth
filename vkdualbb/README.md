@@ -28,5 +28,6 @@ parallel sets under XSPEC.
 python -m numpy.f2py -lopenblas -c vkdualbb.pyf vkdualbb.f90 \
        ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
        ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
-       ../sco_model_LOGbb.f90 ../dependencies/*.f ../xsbbrd.f
+       ../sco_model_LOGbb.f90 ../dependencies/*.f ../xsbbrd.f \
+       -L$HEADAS/../Xspec/BLD/x86_64-pc-linux-gnu-libc2.31/lib/ -lXSUtil -lXSFunctions
 ```

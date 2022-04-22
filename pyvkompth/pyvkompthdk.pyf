@@ -1,0 +1,12 @@
+!    -*- f90 -*-
+python module pyvkompthdk ! in
+    interface  ! in :pyvkompthdk
+        subroutine pyvkompthdk(ear,ne,param,ifl,photar,photer) ! in :pyvkompthdk:pyvkompthdk.f90
+            real*8 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*8 dimension(7),intent(in) :: param
+            integer intent(in) :: ifl, ne
+            real*8 dimension(ne),intent(out),depend(ne) :: photar
+            real*8 dimension(ne),intent(out),depend(ne) :: photer
+        end subroutine pyvkompthdk
+    end interface
+end python module pyvkompthdk

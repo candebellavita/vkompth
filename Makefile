@@ -40,11 +40,11 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #	$(FC) $(FCFLAGS) -c $<
 
 
-all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk
+all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk pyvkompth
 
 model: vkompth_lin vkompth_log vkompth_bb vkompth_dk
 
-wrappers: loader version vkompthbb vkompthdk vkdualbb vkdualdk
+wrappers: loader version vkompthbb vkompthdk vkdualbb vkdualdk pyvkompth
 
 loader:
 	@echo "\nApply PATHTO to load_vkompth.xcm...\n"
@@ -80,10 +80,21 @@ vkdualbb:
 vkdualdk:
 	cd vkdualdk; initpackage vkdualdk lmod_vkdualdk.dat .; cp Makefile_libs Makefile;	hmake; cd ..
 
+pyvkompth:
+	cd pyvkompth; \
+	python -m numpy.f2py -lopenblas -c pyvkompthbb.pyf pyvkompthbb.f90 \
+	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
+	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
+	   ../sco_model_LOGbb.f90 ../dependencies/*.f ../xsbbrd.f; \
+	python -m numpy.f2py -lopenblas -c pyvkompthdk.pyf pyvkompthdk.f90 \
+	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
+	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
+	   ../sco_model_LOG_dskb.f90 ../dependencies/*.f ../xsdskb.f; cd ..
 
-.PHONY: clean vkompthbb vkompthdk vkdualbb vkdualdk model wrappers version
+.PHONY: clean vkompthbb vkompthdk vkdualbb vkdualdk model wrappers version pyvkompth
 clean:
 	-rm -f $(DEPSDIR)/*.o *.o *.mod vkompth_lin vkompth_log vkompth_bb vkompth_dk; \
 	cd vkompthbb; hmake clean; cd ..; cd vkompthdk; hmake clean; cd ..; \
 	cd vkdualbb; hmake clean;	cd ..; cd vkdualdk; hmake clean; cd ..; \
+	cd pyvkompth; rm pyvkompth*cpython*; cd ..; \
 	echo '\n\n   FINISHED make clean all. Ready to re-compile using make. \n'
