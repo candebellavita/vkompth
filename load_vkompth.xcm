@@ -38,7 +38,7 @@ interp alias {} plrls {} "ccp; setpl com wi all; setpl com la ti Title; setpl co
 
 # Definition of local models associated to vKompth
 
-lmod vkompthbb /PATHTO/vkompth/vkompthbb
-lmod vkompthdk /PATHTO/vkompth/vkompthdk
-lmod vkdualdk  /PATHTO/vkompth/vkdualdk
-lmod vkdualbb  /PATHTO/vkompth/vkdualbb
+lmod vkompthbb /PATHTO/vkompthbb
+lmod vkompthdk /PATHTO/vkompthdk
+lmod vkdualdk  /PATHTO/vkdualdk
+lmod vkdualbb  /PATHTO/vkdualbb
