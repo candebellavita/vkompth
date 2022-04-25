@@ -23,6 +23,11 @@ setenv OPENBLAS_NUM_THREADS 2  #(CSH version)
 ```
 
 
+## Run the *python* wrapper
+
+Go into `pyvkompth` subdirectory and run `python3 pyvkompth.py`. A GUI will load plotting both *rms* and *lags* for `vkompthbb` and `vkompthdk` model variants, allowing to modify parameters on-the-fly with intereactive sliders.
+
+
 ## Load and run the *XSPEC* models
 
 In an XSPEC session, for instance, `vkompthbb` can be then loaded using:
@@ -31,10 +36,14 @@ lmod vkompthbb /PATHTO/vkompthbb/
 ```
 (and similar commands for the other wrappers: `vkompthdk`, `vkdualbb` and `vkdualdk`).
 
+Alternatively, the four model variants can be loaded using the `XSPEC` script provided as `@load_vkompth.xcm`. This script also includes plotting commands like `plrl` which can be used to produce a fancy plot for both *rms* and *lags* in *XSPEC* if data are loaded as `data 1:1 rms.pha 2:2 lag.pha`.
 
-## Run the *python* wrapper
+Examples of those can be found under the `MAXI_J1348-630` subdirectoy, which correspond to data published under *Bellavita et al. 2022 (subm. to MNRAS)*.
 
-Go into `pyvkompth` subdirectory and run `python3 pyvkompth.py`. A GUI will load plotting both *rms* and *lags* for `vkompthbb` and `vkompthdk` model variants, allowing to modify parameters on-the-fly with intereactive sliders.
+
+## Preparing your own data
+
+We also provide a `bash` script named `asciiTOvkompth.sh`, which uses `FTOOLS` to convert ASCII files with energy-dependent *rms*, *lags* and *time-averaged* spectra, into *PHA* and *RMF* FITS files fully compatible with our `vKompth` model variants (by including both *QPO frequency* and *mode* as *XFLT* variables for *XSPEC*).
 
 
 ## Questions, comments, issues
