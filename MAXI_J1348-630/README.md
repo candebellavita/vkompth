@@ -31,7 +31,7 @@ Notice that the parameters for the second dataset (the lags in this case) are th
 Because the rms and lag are relative quantities, the model cannot be renormalised. It is therefore a good idea to plot the data and the fit and make some small adjustment to 2 of the parameters to make sure that the model on average matches the data. We make use of the new functionality of XSPEC in HEASOFT 6.30 to plot multiple datasets separately
 
 ```
-XSPEC12>set plot ene; cpd /xs
+XSPEC12>setplot ene; cpd /xs
 XSPEC12>plot 1 lda de 2 da de
 
 ```
@@ -63,7 +63,7 @@ ________________________________________________________________________
 To make the rms of the model roughly match that of the data reduce the parameter `DHext` by a factor of ~10; this will reduce the average rms in the model by the same factor:
 
 ```
-XSPEC12>new 8 .05
+XSPEC12>new 7 .05
 ```
 
 You can replot to confirm.
@@ -71,7 +71,7 @@ You can replot to confirm.
 Next adjust `reflag` such that the average lag of the model is more or less the same as that of the data. In this case the lags of the model are too low compared to the data, so increase `reflag` by ~0.2
 
 ```
-XSPEC12>new 10 .2
+XSPEC12>new 8 .2
 ```
 
 Again, replot to confirm.
@@ -87,11 +87,11 @@ Model vkompthdk<1> Source No.: 1   Active/On
 Model Model Component  Parameter  Unit     Value
  par  comp
                            Data group: 1
-   1    1   vkompthdk  kTs        keV      0.444977     +/-  3.35827E-02  
-   4    1   vkompthdk  size       km       1.12952E+04  +/-  3279.69      
-   5    1   vkompthdk  eta                 0.361139     +/-  6.45261E-02  
-   8    1   vkompthdk  DHext               0.130668     +/-  3.58378E-02  
-  10    1   vkompthdk  reflag              0.122488     +/-  9.19909E-03  
+   1    1   vkompthdk  kTs        keV      0.444975     +/-  3.35827E-02  
+   4    1   vkompthdk  size       km       1.12952E+04  +/-  3279.64      
+   5    1   vkompthdk  eta                 0.361143     +/-  6.45312E-02  
+   7    1   vkompthdk  DHext               0.130667     +/-  3.58373E-02  
+   8    1   vkompthdk  reflag              0.122488     +/-  9.19913E-03  
                            Data group: 2
 ________________________________________________________________________
 ```
