@@ -241,9 +241,8 @@ The bands for the rms and the lags do not have to be the same.
 
 To make the `.pha` and `.rmf` files use the command:
 
-```
-diff
-I don;t know if this is how the tool now works
+```diff
+- I don't know if this is how the tool now works
 ```
 
 ```
