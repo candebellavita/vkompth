@@ -53,8 +53,8 @@ Model Model Component  Parameter  Unit     Value
    1    1   vkompthdk  kTs        keV      0.500000     +/-  0.0          
    4    1   vkompthdk  size       km       1000.00      +/-  0.0          
    5    1   vkompthdk  eta                 0.500000     +/-  0.0          
-   8    1   vkompthdk  DHext               5.00000E-02  +/-  0.0          
-  10    1   vkompthdk  reflag              0.0          +/-  0.0          
+   7    1   vkompthdk  DHext               0.500000     +/-  0.0          
+   8    1   vkompthdk  reflag              0.0          +/-  0.0          
                            Data group: 2
 ________________________________________________________________________
 
