@@ -214,19 +214,23 @@ Since the lags are a relative measurement (lags of a subject band with respect t
 
 If you use any other band as reference, for instance, the lowest energy band, and you want to include that band (with 0 lags) in the fits, you need to assign an error to that lag. For instance, you can use the average error of all the other bands. 
 
-To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the pha+rmf files (see below). These ASCII files must have an extension ‘.ascii’ in the name; they could be, for instance, ‘rms_data.ascii’ and ‘lag_data.ascii’.
+To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the pha+rmf files (see below). These ASCII files must have an extension `.ascii` in the name; they could be, for instance, `rms_data.ascii` and `lag_data.ascii`.
 
 The ASCII file for the rms spectrum of the QPO should have 4 columns:
 
+```
 Emin Emax fractional_rms 1-sigma_error
 …
+```
 
 where Emin and Emax are the minimum and maximum energy of the band for which you have measured the fractional rms amplitudes (with errors), and each row is a new measurement.
 
 The ASCII file for the phase-lag spectrum of the QPO should have 4 columns:
 
+```
 Emin Emax phase-lag_in_rad 1-sigma_error
 …
+```
 
 where Emin and Emax are the minimum and maximum energy of the band for which you have measured the lags (with errors), and each row is a new measurement.
 
@@ -239,7 +243,7 @@ asciiTOvkompth rms_data rms QPO_frequency_in_Hz
 asciiTOvkompth lag_data lag QPO_frequency_in_Hz
 ```
 
-Notice that you do not have give the extension of the ASCII files, which is assumed to be ‘.ascii’.
+Notice that you do not have give the extension of the ASCII files, which is assumed to be `.ascii`.
 
 In both cases we give the frequency of the QPO in Hz. For example, assuming that the QPO frequency is 4.5 Hz, the commands:
 
@@ -248,7 +252,7 @@ asciiTOvkompth rms_data rms 4.5
 asciiTOvkompth lag_data lag 4.5
 ```
 
-take the files `rms_data.ascii` and `lag_data.ascii` and create the files `rms_data.pha / rms_data.rmf’ and `lag_data.pha / lag_data.rmf`, respectively.
+take the files `rms_data.ascii` and `lag_data.ascii` and create the files `rms_data.pha / rms_data.rmf` and `lag_data.pha / lag_data.rmf`, respectively.
 
 The .pha files will have a keyword in the header indicating whether the data are rms amplitudes or lags, and another keyword with the frequency of the QPO given in the command line. These keywords will be used by the model to compute the model of either the rms or the lag for the given frequency.
 
