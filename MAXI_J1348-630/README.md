@@ -198,13 +198,13 @@ Test statistic : Chi-Squared                   21.08     using 32 bins.
 
 Plot to see the fit.
 
-You can compare your fit with the one we got (use file `@vkdualdk.xcm`).
+You can compare your fit with the one we got (file `@vkdualdk.xcm`).
 
 As usual, in other cases you may have to run `error` and `steppar` a few times to see if you can find a deeper minimum. It is also a good idea to run a long MCMC to see if the fit converges to a different solution, or whether the posterior of the parameters is multimodal.
 
 ## 3. Making the rms and lag spectra necessary for the fits:
 
-You will need .pha/.rmf pairs for the rms and the lag spectra. You can make them with your own tools, or use the tool provided here. If you use your own tool, you will need to add two keywords to the rms and lag spectra before you fit. We explain this at the end. If you use the tool provided here to make the files the keywords will be added automatically.
+You will need .pha/.rmf pairs for the rms and the lag spectra. You can make them with your own tools, or use the tool provided here. If you use your own tool, you will need to add two keywords to the rms and lag spectra before you fit. If you use the tool provided here to make the files the keywords will be added automatically.
 
 The rms spectrum must be in fractional units, with values between 0 and 1.
 
