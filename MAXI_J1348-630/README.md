@@ -71,7 +71,7 @@ Next adjust `reflag` such that the average lag of the model is more or less the 
 XSPEC12>new 10 .2
 ```
 
-Again, replete to confirm.
+Again, replot to confirm.
 
 You can now fit. You should get:
 
