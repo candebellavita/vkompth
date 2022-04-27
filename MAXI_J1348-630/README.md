@@ -37,7 +37,9 @@ XSPEC12>plot 1 lda de 2 da de
 ```
 
 We see that there is and offset between the model both for the rms and the lags. Show the free parameters to see which ones to change:
-
+```diff
+- I used the previopus version, where I had to give the mode and the QPO frequency to the mode; I need to update this and all the other Xspec outputs
+```
 ```
 XSPEC12>show fre
 
