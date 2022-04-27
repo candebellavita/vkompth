@@ -1,0 +1,27 @@
+statistic chi
+data 1:1 NICER_rms_dil.pha
+
+data 2:2 NICER_lag.pha
+
+method leven 10 0.01
+systematic 0
+model  vkompthdk
+            0.5       0.05        0.1        0.1          5          5
+             20         -1        0.5        0.5         50         50
+            3.5         -1       1.01       1.01          5          5
+           1000        100        0.1        0.1     200000     200000
+            0.5        0.1          0          0          1          1
+            250         -1        0.1        0.1       1000       1000
+            0.5       0.01          0          0       1000       1000
+              0          1       -3.2       -3.2        3.2        3.2
+              1         -1          0          0      1e+20      1e+24
+= p1
+= p2
+= p3
+= p4
+= p5
+= p6
+= p7
+= p8
+= p9
+bayes off
