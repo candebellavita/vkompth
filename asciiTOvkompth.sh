@@ -9,17 +9,21 @@ then
 fi
 
 echo '   ======================================================='
-echo '     This code translates ascii rms/lags into FITS files'
+echo '     This code converts ascii rms/lags into FITS files'
 echo '     compatible with the variable-Comptonization model by'
 echo '     Bellavita, Garcia, Mendez and Karpouzas (2022).'
 echo '     Original model in: Karpouzas et al. (2020).'
 echo '     Please cite these papers if you use this model.'
 echo '     Feel free to contact us through email or GitHub.'
 echo '   ======================================================='
-echo '     Units:  rms in fractional units and lags in radians'
+echo '     Units:  rms in fractional units [0,1], and lags in radians [-pi/2,pi/2]'
 echo '     Format: E_lo E_hi [rms, lag] [rms_err,lag_err] (68%)'
 echo '   ======================================================='
-echo '     Usage: asciiTOvkompt file.ascii [rms, lag] QPOfreq.'
+echo '     Usage: '
+echo '     "asciiTOvkompt filename_ascii [rms, lag] QPOfreq."'
+echo '     Examples: '
+echo '     "asciiTOvkompt some_file.dat rms 4.5"'
+echo '     "asciiTOvkompt other_file.dat lag 3.1"'
 echo '   ======================================================='
 echo
 
@@ -27,15 +31,24 @@ if [ $# -ne 3 ]
 then
     echo
     echo '  ERROR: Please run with 3 arguments:'
-    echo '              asciiTOvkompt file.ascii [rms, lag] QPOfreq.'
+    echo '              asciiTOvkompt filename_ascii [rms, lag] QPOfreq.'
     echo
     exit
 fi
 
-ascii=$(basename $1 .ascii)
+file=$1
+
+if [ ! -f ${file} ]; then
+    echo 'File "'${file}'" not found!'
+    exit
+fi
+
+
+ext=${file##*.}                 # file extension
+ascii=$(basename $file .$ext)   # file basename
 
 echo '    Converting to FITS...'
-awk '{print $1,$2,$3*($2-$1),$4*($2-$1)}' ${ascii}.ascii > ${ascii}.$$.tmp
+awk '{print $1,$2,$3*($2-$1),$4*($2-$1)}' ${file} > ${ascii}.$$.tmp
 ftflx2xsp ${ascii}.$$.tmp ${ascii}.pha ${ascii}.rmf clobber=yes
 rm ${ascii}.$$.tmp
 echo '                         ... OK'
@@ -43,7 +56,15 @@ echo '                         ... OK'
 if [ $2 == 'rms' ]
 then
 	fparkey "mode: 1" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
 
 	echo ''
 	echo '   Keywords Mode: 1 (rms) ; QPO: '$3' Hz'
@@ -53,7 +74,17 @@ then
 elif [ $2 == 'lag' ]
 then
 	fparkey "mode: 2" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 
 	echo ''
 	echo '    Keywords Mode: 2 (lag) ; QPO: '$3' Hz'
@@ -63,7 +94,17 @@ then
 elif [ $2 == 'sss' ]
 then
 	fparkey "mode: 3" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 
 	echo ''
 	echo '    Keywords Mode: 3 (sss) ; QPO: '$3' Hz'
@@ -73,7 +114,17 @@ then
 elif [ $2 == 'real' ]
 then
 	fparkey "mode: 4" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 
 	echo ''
 	echo '    Keywords Mode: 4 (real) ; QPO: '$3' Hz'
@@ -83,7 +134,17 @@ then
 elif [ $2 == 'imag' ]
 then
 	fparkey "mode: 5" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+        if [ $? -ne 0 ]; then
+           echo 'fparkey command failed on file' ${ascii}.pha
+           exit
+        fi
+
 
 	echo ''
 	echo '    Keywords Mode: 5 (imag) ; QPO: '$3' Hz'
@@ -92,6 +153,8 @@ then
 
 else
 	echo ''
+	echo '  ASCII file was converted to pha/rmf but KEYWORDS were not added to the spectrum.'
+        echo '  The model will not be able to identify the type of data'
 	echo '  ERROR: Indicate spectrum type and QPO frequency.'
 	echo ''
 	exit
