@@ -57,7 +57,7 @@ ________________________________________________________________________
 
 ```
 
-To make the rms of the model roughly match that of the data reduce the parameter `dHext` by a factor of ~10; this will reduce the average rms in the model by the same factor:
+To make the rms of the model roughly match that of the data reduce the parameter `DHext` by a factor of ~10; this will reduce the average rms in the model by the same factor:
 
 ```
 XSPEC12>new 8 .05
@@ -65,7 +65,7 @@ XSPEC12>new 8 .05
 
 You can replot to confirm.
 
-Next adjust reflag such that the average lag of the model is more or less the same as that of the data. In this case the lags of the model are too low compared to the data, so increase `reflag` by ~0.2
+Next adjust `reflag` such that the average lag of the model is more or less the same as that of the data. In this case the lags of the model are too low compared to the data, so increase `reflag` by ~0.2
 
 ```
 XSPEC12>new 10 .2
@@ -154,7 +154,7 @@ It is now wise to give a small “kick” to the parameters of the coronas to ge
 XSPEC12>new 1 .6; new 7 1000; new 9 .8; new 9 .1; new 15 1
 ```
 
-Plot the data and model and change `dHext1`, `dHext2` and `reflag` to match the model to the data on average. In this case it is a bit less intuitive how to do that since the effect of the two `dHext` parameters depends also on the value of `phi`, the relative phase of the 2 coronas. For instance, in this case I get a reasonable match if I set `dHext1` to 0.25 and do not change `reflag` (you will have to experiment in other cases):
+Plot the data and model and change `DHext1`, `DHext2` and `reflag` to match the model to the data on average. In this case it is a bit less intuitive how to do that since the effect of the two `DHext` parameters depends also on the value of `phi`, the relative phase of the 2 coronas. For instance, in this case I get a reasonable match if I set `DHext1` to 0.25 and do not change `reflag` (you will have to experiment in other cases):
 
 ```
 XSPEC12>new 13 .25
