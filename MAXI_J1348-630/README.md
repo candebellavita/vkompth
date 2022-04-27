@@ -204,7 +204,7 @@ As usual, in other cases you may have to run `error` and `steppar` a few times t
 
 ## 3. Making the rms and lag spectra necessary for the fits:
 
-You will need .pha/.rmf pairs for the rms and the lag spectra. You can make them with your own tools, or use the tool provided here. If you use your own tool, you will need to add two keywords to the rms and lag spectra before you fit. If you use the tool provided here to make the files the keywords will be added automatically.
+You will need `.pha/.rmf` pairs for the rms and the lag spectra. You can make them with your own tools, or use the tool provided here. If you use your own tool, you will need to add two keywords to the rms and lag spectra before you fit. If you use the tool provided here to make the files the keywords will be added automatically.
 
 The rms spectrum must be in fractional units, with values between 0 and 1.
 
@@ -214,7 +214,7 @@ Since the lags are a relative measurement (lags of a subject band with respect t
 
 If you use any other band as reference, for instance, the lowest energy band, and you want to include that band (with 0 lags) in the fits, you need to assign an error to that lag. For instance, you can use the average error of all the other bands. 
 
-To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the pha+rmf files (see below). These ASCII files must have an extension `.ascii` in the name; they could be, for instance, `rms_data.ascii` and `lag_data.ascii`.
+To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the `pha/rmf` files (see below). These ASCII files must have an extension `.ascii` in the name; they could be, for instance, `rms_data.ascii` and `lag_data.ascii`.
 
 The ASCII file for the rms spectrum of the QPO should have 4 columns:
 
@@ -236,7 +236,7 @@ where Emin and Emax are the minimum and maximum energy of the band for which you
 
 The bands for the rms and the lags do not have to be the same.
 
-To make the .pha and .rmf files use the command:
+To make the `.pha` and `.rmf` files use the command:
 
 ```
 asciiTOvkompth rms_data rms QPO_frequency_in_Hz
@@ -289,7 +289,7 @@ You can then define a model like:
 model vkompthdk + phabs*(diskbb+vkompthdk)
 ```
 
-As before, the rms and lags will have a keyword that is passed to the model; since the source spectrum does not have such keyword the model `vkompthdk` will output the time-averaged total spectrum (simular to `nthcomp`).
+As before, the rms and lags will have a keyword that is passed to the model; since the source spectrum does not have such keyword the model `vkompthdk` will output the time-averaged total spectrum (similar to `nthcomp`).
 
 One has to be careful when defining the parameters such that the first `vkompthdk` component fits the rms and lags of the QPO and the rest of the model fits the source spectrum. You can then link the common parameters between the first and second `vkompthdk`and the temperatures of the seed photon source in `diskbb` and the two `vkompthdk`. Since the time-averaged version of `vkompthdk` is equivalent to `nthcomp`, you can use the latter if you prefer instead of the second `vkompthdk`.
 
