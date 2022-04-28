@@ -8,30 +8,32 @@ then
 	exit
 fi
 
-echo '   ======================================================='
+echo '   ========================================================='
 echo '     This code converts ascii rms/lags into FITS files'
 echo '     compatible with the variable-Comptonization model by'
 echo '     Bellavita, Garcia, Mendez and Karpouzas (2022).'
-echo '     Original model in: Karpouzas et al. (2020).'
+echo '     Original models: Karpouzas+2020, Garcia+2021.'
 echo '     Please cite these papers if you use this model.'
 echo '     Feel free to contact us through email or GitHub.'
-echo '   ======================================================='
-echo '     Units:  rms in fractional units [0,1], and lags in radians [-pi/2,pi/2]'
+echo '   ========================================================='
+echo '     Units:  rms in fractional units [0,1]'
+echo '             lags in radians [-pi/2,pi/2]'
+echo '             QPO freq in Hz'
 echo '     Format: E_lo E_hi [rms, lag] [rms_err,lag_err] (68%)'
-echo '   ======================================================='
+echo '   ========================================================='
 echo '     Usage: '
-echo '     "asciiTOvkompt filename_ascii [rms, lag] QPOfreq."'
+echo '       asciiTOvkompth filename_ascii [rms, lag] QPOfreq'
 echo '     Examples: '
-echo '     "asciiTOvkompt some_file.dat rms 4.5"'
-echo '     "asciiTOvkompt other_file.dat lag 3.1"'
-echo '   ======================================================='
+echo '       asciiTOvkompth some_file.dat    rms 4.5'
+echo '       asciiTOvkompth other_file.ascii lag 3.1'
+echo '   ========================================================='
 echo
 
 if [ $# -ne 3 ]
 then
     echo
     echo '  ERROR: Please run with 3 arguments:'
-    echo '              asciiTOvkompt filename_ascii [rms, lag] QPOfreq.'
+    echo '    asciiTOvkompth filename_ascii [rms, lag] QPOfreq'
     echo
     exit
 fi
@@ -39,7 +41,9 @@ fi
 file=$1
 
 if [ ! -f ${file} ]; then
-    echo 'File "'${file}'" not found!'
+	  echo
+    echo '  ERROR: File "'${file}'" not found!'
+		echo
     exit
 fi
 
@@ -57,104 +61,124 @@ if [ $2 == 'rms' ]
 then
 	fparkey "mode: 1" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 	echo ''
 	echo '   Keywords Mode: 1 (rms) ; QPO: '$3' Hz'
-        echo '              were succesfully added.'
-        echo ''
+  echo '              were succesfully added.'
+  echo ''
 
 elif [ $2 == 'lag' ]
 then
 	fparkey "mode: 2" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 
 	echo ''
 	echo '    Keywords Mode: 2 (lag) ; QPO: '$3' Hz'
-        echo '              were succesfully added.'
-        echo ''
+  echo '              were succesfully added.'
+  echo ''
 
 elif [ $2 == 'sss' ]
 then
 	fparkey "mode: 3" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+           echo
+					 echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+           echo
+					 echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 
 	echo ''
 	echo '    Keywords Mode: 3 (sss) ; QPO: '$3' Hz'
-        echo '              were succesfully added.'
-        echo ''
+  echo '              were succesfully added.'
+  echo ''
 
 elif [ $2 == 'real' ]
 then
 	fparkey "mode: 4" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 
 	echo ''
 	echo '    Keywords Mode: 4 (real) ; QPO: '$3' Hz'
-        echo '              were succesfully added.'
-        echo ''
+  echo '              were succesfully added.'
+  echo ''
 
 elif [ $2 == 'imag' ]
 then
 	fparkey "mode: 5" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+           echo
+					 echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 	fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
         if [ $? -ne 0 ]; then
-           echo 'fparkey command failed on file' ${ascii}.pha
+					 echo
+           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+					 echo
            exit
         fi
 
 
 	echo ''
 	echo '    Keywords Mode: 5 (imag) ; QPO: '$3' Hz'
-        echo '              were succesfully added.'
-        echo ''
+  echo '              were succesfully added.'
+  echo ''
 
 else
 	echo ''
 	echo '  ASCII file was converted to pha/rmf but KEYWORDS were not added to the spectrum.'
-        echo '  The model will not be able to identify the type of data'
+  echo '  The vKompth XSPEC model will not be able to identify the type of data.'
 	echo '  ERROR: Indicate spectrum type and QPO frequency.'
 	echo ''
 	exit
