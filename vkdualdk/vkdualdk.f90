@@ -42,6 +42,7 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     DATA firstcall/.true./
 
     cj = (0.0,1.0)
+    bwX = 0
 
     !This model does not return model variances.
     photer = 0
