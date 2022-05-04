@@ -177,8 +177,8 @@ then
 
 else
 	echo ''
-	echo '  ASCII file was converted to pha/rmf but KEYWORDS were not added to the spectrum.'
-  echo '  The vKompth XSPEC model will not be able to identify the type of data.'
+	echo ' ASCII file was converted to pha/rmf but KEYWORDS were not added to the spectrum.'
+  echo ' The vKompth XSPEC model will not be able to identify the type of data.'
 	echo '  ERROR: Indicate spectrum type and QPO frequency.'
 	echo ''
 	exit

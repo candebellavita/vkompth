@@ -14,7 +14,7 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION Lsize2, kTe2, kTs2, gam2, eta2, DHext2
     DOUBLE PRECISION :: tau, qpo_freq, phi, af, reflag, sss_norm
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
-    DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX)
+    DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX+1), XM(NX)
     DOUBLE PRECISION :: Xmin, Xmax
 
     DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out
@@ -181,11 +181,11 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
 
     Xmin = log(1e-2)
     Xmax = log(1000.)
-    CALL sco_linspace(Xmin, Xmax, NX, X)
+    CALL sco_linspace(Xmin, Xmax, NX+1, X)
     X = exp(X)
 
     IF (ne .LT. ENEMAX) THEN
-        DO I= 1, NX-1
+        DO I= 1, NX
           bwX(i,1) = X(i)
           bwX(i,2) = X(i+1)
         END DO
@@ -230,7 +230,7 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     call fpmstr(pdTs2mod,dTs2mod)
 
     IF (ne .LT. ENEMAX) THEN
-        DO I= 1, NX-1
+        DO I= 1, NX
           bwX(i,1) = X(i)
           bwX(i,2) = X(i+1)
         END DO
@@ -245,15 +245,15 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
 
     ! We now add the two components
     SSS_bandT = SSS_band1 + SSS_band2
-    SSS_bandT(NX) = 1.0
     Re_bandT = REALPART(new_complex1+new_complex2)/SSS_bandT
     Im_bandT = IMAGPART(new_complex1+new_complex2)/SSS_bandT
 
     nestsol = NX + 4
     ! We now fit Splines to the solution
-    CALL sco_InterpolatedUnivariateSpline(NX,X,SSS_bandT,nestsol,Nsss,Tsss,Ssss)
-    CALL sco_InterpolatedUnivariateSpline(NX,X,Re_bandT,nestsol,Nreal,Treal,Sreal)
-    CALL sco_InterpolatedUnivariateSpline(NX,X,Im_bandT,nestsol,Nimag,Timag,Simag)
+    XM = 0.5*(X(1:NX)+X(2:NX+1))
+    CALL sco_InterpolatedUnivariateSpline(NX,XM,SSS_bandT,nestsol,Nsss,Tsss,Ssss)
+    CALL sco_InterpolatedUnivariateSpline(NX,XM,Re_bandT,nestsol,Nreal,Treal,Sreal)
+    CALL sco_InterpolatedUnivariateSpline(NX,XM,Im_bandT,nestsol,Nimag,Timag,Simag)
 
     ! We finally obtain the solution on the bwRef vector based on ear
     IF (ne .LT. ENEMAX) THEN
