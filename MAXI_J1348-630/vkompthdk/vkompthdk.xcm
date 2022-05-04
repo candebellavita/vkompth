@@ -1,18 +1,13 @@
 statistic chi
 data 1:1 NICER_rms_dil.pha
-resp 1 NICER_rms_dil.rmf
 data 2:2 NICER_lag.pha
-resp 2 NICER_lag.rmf
 
 method leven 10 0.01
 abund angr
 xsect vern
 cosmo 70 0 0.73
 xset delta 0.01
-xset DTE_MOD    0.22750140187033704
-xset DTS_MOD     1.0936772298337838E-002
 systematic 0
-mdefine reflag reflag : add
 model  vkompthdk
        0.442424       0.05        0.1        0.1          5          5
              20         -1        0.5        0.5         50         50
