@@ -17,11 +17,11 @@ XSPEC12>@vkompthdk_init.xcm
 …
 XSPEC12>show fit
 
-Fit statistic  : Chi-Squared                43051.45     using 16 bins.
+Fit statistic  : Chi-Squared                43051.43     using 16 bins.
                  Chi-Squared                 1786.84     using 16 bins.
-Total fit statistic                         44838.29     with 27 d.o.f.
+Total fit statistic                         44838.27     with 27 d.o.f.
 
-Test statistic : Chi-Squared                44838.29     using 32 bins.
+Test statistic : Chi-Squared                44838.27     using 32 bins.
  Null hypothesis probability of 0.00e+00 with 27 degrees of freedom
  Current data and model not fit yet.
 ```
@@ -79,7 +79,10 @@ Again, replot to confirm.
 You can now fit. You should get:
 
 ```
-XSPEC12>show fre
+fit
+...
+
+XSPEC12>show free
 
 Free parameters defined:
 ========================================================================
@@ -87,10 +90,10 @@ Model vkompthdk<1> Source No.: 1   Active/On
 Model Model Component  Parameter  Unit     Value
  par  comp
                            Data group: 1
-   1    1   vkompthdk  kTs        keV      0.444975     +/-  3.35827E-02  
-   4    1   vkompthdk  size       km       1.12952E+04  +/-  3279.64      
-   5    1   vkompthdk  eta                 0.361143     +/-  6.45312E-02  
-   7    1   vkompthdk  DHext               0.130667     +/-  3.58373E-02  
+   1    1   vkompthdk  kTs        keV      0.444975     +/-  3.35830E-02  
+   4    1   vkompthdk  size       km       1.12952E+04  +/-  3279.67      
+   5    1   vkompthdk  eta                 0.361142     +/-  6.45270E-02  
+   7    1   vkompthdk  DHext               0.130667     +/-  3.58376E-02  
    8    1   vkompthdk  reflag              0.122488     +/-  9.19913E-03  
                            Data group: 2
 ________________________________________________________________________
@@ -124,6 +127,9 @@ XSPEC12>plot
 … etc.
 ```
 
+The reference lag (parameter `reflag`) gives the lag in the energy band 2-3 keV (it is a sort of "additive" normalisation), and is in principle defined between -\pi and \pi; to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range to (approximately) [-2\pi,2\pi] in the .xcm files. If the resulting fit is outside the [-\pi,\pi] range you can always bring it back to that range subtrtacting `n \pi` to it and get the same fit. 
+
+
 While the fit looks relatively okay, as in Garcia et al. (2021), the errors of the rms have been multiplied by a factor so that the rms does not (totally) dominate the fit. Besides, there are some systematic negative residuals both in the rms and the lags at around 2-3 keV, and positive residuals at low and high energies.
 
 Let’s therefore try a 2-corona model.
@@ -147,14 +153,14 @@ To start the fit of the 2 coronas at the point where we ended with a 1-corona mo
 We know untie the parameters of the second corona (you can check the number of the parameters with `show all` or `show tied`) and free the phase between the 2 coronas:
 
 ```
-XSPEC12>untie 2 4 6 8 10 14 ; thaw 15
+XSPEC12>untie 2 4 6 8 10 13 ; thaw 14
 ```
 
 It is now wise to give a small “kick” to the parameters of the coronas to get the model out of the current minimum of the chi^2 (if you do not do that, it may stay there and miss a deeper minimum). E.g.:
 
 
 ```
-XSPEC12>new 1 .6; new 7 1000; new 9 .8; new 9 .1; new 15 1
+XSPEC12>new 1 .6; new 7 1000; new 9 .8; new 9 .1; new 14 1
 ```
 
 Plot the data and model and change `DHext1`, `DHext2` and `reflag` to match the model to the data on average. In this case it is a bit less intuitive how to do that since the effect of the two `DHext` parameters depends also on the value of `phi`, the relative phase of the 2 coronas. For instance, in this case I get a reasonable match if I set `DHext1` to 0.25 and do not change `reflag` (you will have to experiment in other cases):
@@ -175,35 +181,36 @@ Model vkdualdk<1> Source No.: 1   Active/On
 Model Model Component  Parameter  Unit     Value
  par  comp
                            Data group: 1
-   1    1   vkdualdk   kTs1       keV      0.958184     +/-  0.501929     
-   2    1   vkdualdk   kTs2       keV      0.423242     +/-  8.94960E-02  
-   7    1   vkdualdk   size1      km       163.448      +/-  430.400      
-   8    1   vkdualdk   size2      km       1.18282E+04  +/-  9200.07      
-   9    1   vkdualdk   eta1                0.965229     +/-  0.180595     
-  10    1   vkdualdk   eta2                0.214920     +/-  0.650714     
-  13    1   vkdualdk   DHext1              0.204780     +/-  0.237245     
-  14    1   vkdualdk   DHext2              0.211659     +/-  0.146753     
-  15    1   vkdualdk   phi                 -3.26031     +/-  0.384806     
-  17    1   vkdualdk   reflag              0.145333     +/-  1.31813E-02  
+   1    1   vkdualdk   kTs1       keV      0.941532     +/-  0.497498     
+   2    1   vkdualdk   kTs2       keV      0.415227     +/-  8.77618E-02  
+   7    1   vkdualdk   size1      km       162.234      +/-  421.495      
+   8    1   vkdualdk   size2      km       1.18043E+04  +/-  9017.72      
+   9    1   vkdualdk   eta1                0.965983     +/-  0.179306     
+  10    1   vkdualdk   eta2                0.214263     +/-  0.651540     
+  12    1   vkdualdk   DHext1              0.204456     +/-  0.238233     
+  13    1   vkdualdk   DHext2              0.211316     +/-  0.144834     
+  14    1   vkdualdk   phi                 -3.26481     +/-  0.390857     
+  15    1   vkdualdk   reflag              0.145316     +/-  1.31834E-02  
                            Data group: 2
 ________________________________________________________________________
 
 XSPEC12>show fit
 
-Fit statistic  : Chi-Squared                   13.40     using 16 bins.
+Fit statistic  : Chi-Squared                   13.39     using 16 bins.
                  Chi-Squared                    7.68     using 16 bins.
-Total fit statistic                            21.08     with 22 d.o.f.
+Total fit statistic                            21.07     with 22 d.o.f.
 
-Test statistic : Chi-Squared                   21.08     using 32 bins.
+Test statistic : Chi-Squared                   21.07     using 32 bins.
  Null hypothesis probability of 5.16e-01 with 22 degrees of freedom
-
 ```
 
 Plot to see the fit.
 
-You can compare your fit with the one we got (file `@vkdualdk.xcm`).
+You can improve the fit running `error` and `steppar` commands; compare your fit with the one we got (file `@vkdualdk.xcm`).
 
-As usual, in other cases you may have to run `error` and `steppar` a few times to see if you can find a deeper minimum. It is also a good idea to run a long MCMC to see if the fit converges to a different solution, or whether the posterior of the parameters is multimodal.
+In other cases it may also be a good idea to run a long MCMC to see if the fit converges to a different solution, or whether the posterior of the parameters is multimodal.
+
+The phase difference between the 2 coronas (parameter `phi`) is defined between 0 and \pi; to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range of this parameter to (approximately) [-2\pi,2\pi] in the .xcm files. If the resulting fit is outside the [0,\2pi] range you can always bring it back to that range by subtracting `n 2\pi` to it and get the same fit. 
 
 ## 3. Making the rms and lag spectra necessary for the fits:
 
