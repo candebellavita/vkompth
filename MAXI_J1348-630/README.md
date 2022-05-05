@@ -36,11 +36,9 @@ XSPEC12>plot 1 lda de 2 da de
 
 ```
 
+![figura](figure1.png)
+
 We see that there is and offset between the model both for the rms and the lags. Show the free parameters to see which ones to change:
-```diff
-- I used the previopus version, where I had to give the mode and the QPO frequency to the mode; 
-I need to update this and all the other Xspec outputs
-```
 ```
 XSPEC12>show fre
 
@@ -68,6 +66,8 @@ XSPEC12>new 7 .05
 
 You can replot to confirm.
 
+![figura](figure2.png)
+
 Next adjust `reflag` such that the average lag of the model is more or less the same as that of the data. In this case the lags of the model are too low compared to the data, so increase `reflag` by ~0.2
 
 ```
@@ -75,6 +75,8 @@ XSPEC12>new 8 .2
 ```
 
 Again, replot to confirm.
+
+![figura](figure3.png)
 
 You can now fit. You should get:
 
@@ -113,6 +115,8 @@ Test statistic : Chi-Squared                   93.16     using 32 bins.
 ```
 
 Plot and see the result.
+
+![figura](figure4.png)
 
 We also provide an `.xcm` file with our best-fitting model. You can load it and compare with your result:
 
@@ -163,11 +167,17 @@ It is now wise to give a small “kick” to the parameters of the coronas to ge
 XSPEC12>new 1 .6; new 7 1000; new 9 .8; new 9 .1; new 14 1
 ```
 
-Plot the data and model and change `DHext1`, `DHext2` and `reflag` to match the model to the data on average. In this case it is a bit less intuitive how to do that since the effect of the two `DHext` parameters depends also on the value of `phi`, the relative phase of the 2 coronas. For instance, in this case I get a reasonable match if I set `DHext1` to 0.25 and do not change `reflag` (you will have to experiment in other cases):
+Plot the data and model and change `DHext1`, `DHext2` and `reflag` to match the model to the data on average. 
+
+![figura](figure5.png)
+
+In this case it is a bit less intuitive how to do that since the effect of the two `DHext` parameters depends also on the value of `phi`, the relative phase of the 2 coronas. For instance, in this case I get a reasonable match if I set `DHext1` to 0.25 and do not change `reflag` (you will have to experiment in other cases):
 
 ```
 XSPEC12>new 13 .25
 ```
+
+![figura](figure6.png)
 
 Then fit and after a while you should get:
 
@@ -206,6 +216,8 @@ Test statistic : Chi-Squared                   21.07     using 32 bins.
 
 Plot to see the fit.
 
+![figura](figure7.png)
+
 You can improve the fit running `error` and `steppar` commands; compare your fit with the one we got (file `@vkdualdk.xcm`).
 
 In other cases it may also be a good idea to run a long MCMC to see if the fit converges to a different solution, or whether the posterior of the parameters is multimodal.
@@ -224,9 +236,9 @@ Since the lags are a relative measurement (lags of a subject band with respect t
 
 If you use any other band as reference, for instance, the lowest energy band, and you want to include that band (with 0 lags) in the fits, you need to assign an error to that lag. For instance, you can use the average error of all the other bands. 
 
-To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the `pha/rmf` files (see below). These ASCII files must have an extension `.ascii` in the name; they could be, for instance, `rms_data.ascii` and `lag_data.ascii`.
+To create the rms and lag spectra using the tool provided, you will need ASCII files with the data (units explained above) that you will use to make the `pha/rmf` files (see below). These could be, for instance, `rms_data.ascii` and `lag_data.ascii`.
 
-The ASCII file for the rms spectrum of the QPO should have 4 columns:
+The ASCII file for the rms spectrum of the QPO should have 4 columns and as many rows as energy bands you have:
 
 ```
 Emin Emax fractional_rms 1-sigma_error
@@ -235,7 +247,7 @@ Emin Emax fractional_rms 1-sigma_error
 
 where Emin and Emax are the minimum and maximum energy of the band for which you have measured the fractional rms amplitudes (with errors), and each row is a new measurement.
 
-The ASCII file for the phase-lag spectrum of the QPO should have 4 columns:
+The ASCII file for the phase-lag spectrum of the QPO should have 4 columns and as many rows as energy bands you have:
 
 ```
 Emin Emax phase-lag_in_rad 1-sigma_error
@@ -244,26 +256,20 @@ Emin Emax phase-lag_in_rad 1-sigma_error
 
 where Emin and Emax are the minimum and maximum energy of the band for which you have measured the lags (with errors), and each row is a new measurement.
 
-The bands for the rms and the lags do not have to be the same.
+Noticve that the bands for the rms and the lags do not have to be the same.
 
 To make the `.pha` and `.rmf` files use the command:
 
-```diff
-- I don't know if this is how the tool now works
 ```
-
+asciiTOvkompth rms_data.ascii rms QPO_frequency_in_Hz
+asciiTOvkompth lag_data.ascii lag QPO_frequency_in_Hz
 ```
-asciiTOvkompth rms_data rms QPO_frequency_in_Hz
-asciiTOvkompth lag_data lag QPO_frequency_in_Hz
-```
-
-Notice that you do not have give the extension of the ASCII files, which is assumed to be `.ascii`.
 
 In both cases we give the frequency of the QPO in Hz. For example, assuming that the QPO frequency is 4.5 Hz, the commands:
 
 ```
-asciiTOvkompth rms_data rms 4.5
-asciiTOvkompth lag_data lag 4.5
+asciiTOvkompth rms_data.ascii rms 4.5
+asciiTOvkompth lag_data.ascii lag 4.5
 ```
 
 take the files `rms_data.ascii` and `lag_data.ascii` and create the files `rms_data.pha / rms_data.rmf` and `lag_data.pha / lag_data.rmf`, respectively.
