@@ -10,7 +10,7 @@ We provide a number of files under the subdirectory `MAXI_J1348-630/` that you c
 XSPEC12>lmod vkompthdk /full_path_to_the_directory_with_the_model/
 ```
 
-Use the .xcm file `@vkompthdk_init.xcm` to load the data (data 1:1 is the rms and data 2:2 is the lags), define the model and give some initial values to the parameters:
+Use the `.xcm` file `@vkompthdk_init.xcm` to load the data (data 1:1 is the rms and data 2:2 is the lags), define the model and give some initial values to the parameters:
 
 ```
 XSPEC12>@vkompthdk_init.xcm
@@ -131,7 +131,11 @@ XSPEC12>plot
 … etc.
 ```
 
-The reference lag (parameter `reflag`) gives the lag in the energy band 2-3 keV (it is a sort of "additive" normalisation), and is in principle defined between -\pi and \pi; to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range to (approximately) [-2\pi,2\pi] in the .xcm files. If the resulting fit is outside the [-\pi,\pi] range you can always bring it back to that range subtrtacting `n \pi` to it and get the same fit. 
+The reference lag (parameter `reflag`) gives the lag in the energy band 2-3 keV 
+```diff
+-Is this the correct band?
+```
+(it is a sort of "additive" normalisation), and is in principle defined between `-pi` and `pi`; to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range to (approximately) `[-2pi,2pi]` in the `.xcm`  files. If the resulting fit is outside the `[-pi,pi]` range you can always bring it back to that range subtrtacting `n pi` to it and get the same fit. 
 
 
 While the fit looks relatively okay, as in Garcia et al. (2021), the errors of the rms have been multiplied by a factor so that the rms does not (totally) dominate the fit. Besides, there are some systematic negative residuals both in the rms and the lags at around 2-3 keV, and positive residuals at low and high energies.
@@ -146,7 +150,7 @@ Given that the models with 2 coronas (dual models) have more free parameters tha
 XSPEC12>lmod vkdualdk /full_path_to_the_directory_with_the_model/
 ```
 
-Use the .xcm file `@vkdualdk_init.xcm` to load the data (data 1:1 is the rms and data 2:2 is the lags), define the model and give some initial values to the parameters:
+Use the `.xcm` file `@vkdualdk_init.xcm` to load the data (data 1:1 is the rms and data 2:2 is the lags), define the model and give some initial values to the parameters:
 
 ```
 XSPEC12>@vkdualdk_initial.xcm 
@@ -154,7 +158,7 @@ XSPEC12>@vkdualdk_initial.xcm
 
 To start the fit of the 2 coronas at the point where we ended with a 1-corona model, in this `.xcm` file we set all the parameters of the second corona equal to those of the first corona and the phase of the oscillations of the second corona with respect to the first one equal to 0. By doing this, the dual-corona model reproduces the case of a single corona. (Notice that in this case the rms values are not multiplied by the factor but have the true errors, and hence the chi^2 is bigger than in the previous example.)
 
-We know untie the parameters of the second corona (you can check the number of the parameters with `show all` or `show tied`) and free the phase between the 2 coronas:
+We now untie the parameters of the second corona (you can check the number of the parameters with `show all` or `show tied`) and free the phase between the 2 coronas:
 
 ```
 XSPEC12>untie 2 4 6 8 10 13 ; thaw 14
@@ -222,7 +226,11 @@ You can improve the fit running `error` and `steppar` commands; compare your fit
 
 In other cases it may also be a good idea to run a long MCMC to see if the fit converges to a different solution, or whether the posterior of the parameters is multimodal.
 
-The phase difference between the 2 coronas (parameter `phi`) is defined between 0 and \pi; to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range of this parameter to (approximately) [-2\pi,2\pi] in the .xcm files. If the resulting fit is outside the [0,\2pi] range you can always bring it back to that range by subtracting `n 2\pi` to it and get the same fit. 
+The phase difference between the 2 coronas (parameter `phi`) is defined between `-pi` and `pi`; 
+```diff
+-Is this the correct range?
+```
+to avoid that the parameter pegs at the upper or lower bounds when trying to wrap around the limts, we set the range of this parameter to (approximately) [-pi,pi] in the `.xcm` files. If the resulting fit is outside this range you can always bring it back to that range by subtracting `n x (2pi)` to it and get the same fit. 
 
 ## 3. Making the rms and lag spectra necessary for the fits:
 
@@ -230,7 +238,7 @@ You will need `.pha/.rmf` pairs for the rms and the lag spectra. You can make th
 
 The rms spectrum must be in fractional units, with values between 0 and 1.
 
-The lag spectrum must be phase lags in radians, with values from -pi/2 to pi/2.
+The lag spectrum must be phase lags in radians, with values from `-pi/2` to `pi/2`.
 
 Since the lags are a relative measurement (lags of a subject band with respect to some reference band), the reference band for the lags is not important because this only adds a constant to the lag spectrum; the model accounts for this (this is equivalent to the normalisation in additive models). You can therefore choose any band as the reference band. Notice that if you use the full band as reference, and this one encompasses some of the subject bands, you will need to correct the lags for the correlation introduced by the photons that are the same in both the subject and reference band. See Ingram 2019 for that.
 
@@ -256,7 +264,7 @@ Emin Emax phase-lag_in_rad 1-sigma_error
 
 where Emin and Emax are the minimum and maximum energy of the band for which you have measured the lags (with errors), and each row is a new measurement.
 
-Noticve that the bands for the rms and the lags do not have to be the same.
+Notice that the bands for the rms and the lags do not have to be the same.
 
 To make the `.pha` and `.rmf` files use the command:
 
@@ -276,6 +284,8 @@ take the files `rms_data.ascii` and `lag_data.ascii` and create the files `rms_d
 
 The .pha files will have a keyword in the header indicating whether the data are rms amplitudes or lags, and another keyword with the frequency of the QPO given in the command line. These keywords will be used by the model to compute the model of either the rms or the lag for the given frequency.
 
+WARNING: If you use your own tools to create the `.pha/.rmf` files, but do not add the keywords to the `.pha`, the model will not work properly.
+
 ## 4. Notes:
 
 Do not combine 2 or more instances of this model in Xspec. The correct way to do this is to add components in the Fourier, Real and Imaginary, space. Adding components may improve the fits, but will have no physical meaning.
@@ -286,7 +296,7 @@ Do not add multiplicative components (phabs, gabs, etc.) to the model. The same 
 
 Notice, by the way, that absorption does not affect the rms or lags.
 
-Although the rms amplitude is independent of the effective area of the instrument that is used to measure them, the background does affect the rms. This is so because the rms is defined in terms of the power, P, the total observed count rate, C, and the background count rate, B, as:
+Although the rms amplitude is independent of the effective area of the instrument that is used to measure them (since the rms amplitude is a ratio, the effective area cancels out), the background does affect the rms. This is so because the rms is defined in terms of the power, P, the total observed count rate, C, and the background count rate, B, as:
 
 `rms =\sqrt{P/C} * (C)/(C - B)`.
 
@@ -328,6 +338,7 @@ If you obtained a fit of the total spectrum separately, you can apply a dilution
 A quick (and not complete) explanation of how to do this is:
 
 a. Read your data and define your model as in 5.1.
+
 b. Use the command `mdefine` in Xspec to define the dilution. For example:
 
 `XSPEC12>mdefine dilution nthcomp(Tin,Gam,kTe,1,0)*n_nth / (diksbb(Tin)*n_dbb + nthcomp(Tin,Gam,kTe,1,0)*n_nth) : mul`
