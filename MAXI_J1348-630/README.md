@@ -295,6 +295,8 @@ Although the rms amplitude is independent of the effective area of the instrumen
 
 If the total and background count rates used in the calculation are wrong (e.g., the background comes from a model but is not properly calibrated, the total count rate includes contamination from other sources that is not taken into account in the background count rate, or there are particle flares during the observation that are not accounted for), the rms may be biased one way or another. This may be noticeable if you are fitting simultaneous observations with different instruments. (Notice that the same may happen if you measure the same source with the same instruments at different times. The rms amplitude of the QPO of the source may not change, but a background flare, not properly accounted for, may affect the observed rms amplitude.)
 
+The paramter `phi`in the dual model has soft/hard limits of `-6.4/+6.4` (approximately `-2pi/+2pi`). In reality the solution is the same for `phi + k 2pi`, with `k` any positive/negative integer number, so if you find that in your fit `phi` pegs at any of the hard limits you should add/subtract `2pi` to it and refit. Adding/subtracting `2pi` will not change the fit, but may allow the model to move `phi` up or down a little bit. In the end it is customary to report angles between `-pi` anbd `+pi`, so you can always fold the final `phi` into that range.   
+
 
 ## 5. More advanced usage of the model:
 
