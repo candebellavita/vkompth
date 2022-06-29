@@ -1,6 +1,6 @@
 # vKompth
 
-This is the Fortran version of the [vKompth](https://github.com/candebellavita/vkompth) code from *Bellavita et al. 2022 (subm. to MNRAS)* which was originally developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/abstract) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/abstract).
+This is the Fortran version of the [vKompth](https://github.com/candebellavita/vkompth) code from [Bellavita et al. 2022, MNRAS in press](https://arxiv.org/abs/2206.13609) which was originally developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/abstract) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/abstract).
 
 
 ## Requirements
