@@ -67,7 +67,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     end if
 
     mode = int(DGFILT(ifl, 'mode'))
-    if ((mode.lt.0.99).OR.(mode.gt.5.01)) mode=0
+    if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(8)
     qpo_freq = DGFILT(ifl, 'QPO')
 
