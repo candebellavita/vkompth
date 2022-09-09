@@ -6,7 +6,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: ear(0:ne), param(8), photar(ne), photer(ne)
     LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE), photpow(MAXNE)
     DOUBLE PRECISION, save :: pkTs, pkTe, pgam, psize, peta_frac, pqpo_freq, paf, pDHext, pear(0:MAXNE)
 
     DOUBLE PRECISION :: af, Lsize, kTe, kTs, gam, reflag, sss_norm
@@ -107,7 +107,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
                 photar = photimag(1:ne)
                 return
             else if (mode.eq.6) then
-                photar = photrms(1:ne)**2/2
+                photar = photpow(1:ne)
                 return
             end if
     end if
@@ -174,6 +174,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
         ENDIF
 
         photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+        photpow = 0.5*fracrms(2:ne+1)**2*(ear(1:ne)-ear(0:ne-1))
         photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
         photsss = SSS_band(2:ne+1)/sss_norm
         photreal = Re_band(2:ne+1)/sss_norm
@@ -202,6 +203,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
             DO J = 2, ENEMAX-1
                 IF (ear(I) .LE. bwRef(J, 2) .AND. ear(I) .GE. bwRef(J, 1)) THEN
                     photrms(i) = fracrms(J)*(ear(I)-ear(I-1))
+                    photpow(i) = 0.5*fracrms(J)**2*(ear(I)-ear(I-1))
                     photlags(i) = plag_scaled(J)*(ear(I)-ear(I-1))
                     photsss(i) = SSS_band(J)/sss_norm
                     photreal(i) = Re_band(J)/sss_norm
@@ -227,7 +229,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
         photar = photimag(1:ne)
         return
     else if (mode.eq.6) then
-        photar = photrms(1:ne)**2/2
+        photar = photpow(1:ne)
         return
     end if
 

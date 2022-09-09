@@ -6,7 +6,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION ear(0:ne), param(15), photar(ne), photer(ne)
     LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE), photpow(MAXNE)
     DOUBLE PRECISION, save :: pkTs1, pkTe1, pgam1, pLsize1, peta1, pqpo_freq, paf, pDHext1, pear(0:MAXNE)
     DOUBLE PRECISION, save :: pkTs2, pkTe2, pgam2, pLsize2, peta2, pDHext2, pphi
 
@@ -126,7 +126,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
                 photar = photimag(1:ne)
                 return
             else if (mode.eq.6) then
-                photar = photrms(1:ne)**2/2
+                photar = photpow(1:ne)
                 return
             end if
     end if
@@ -293,6 +293,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     ENDIF
 
     photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+    photpow = 0.5*fracrms(2:ne+1)**2*(ear(1:ne)-ear(0:ne-1))
     photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
     photsss = SSS_band(2:ne+1)/sss_norm
     photreal = Re_band(2:ne+1)/sss_norm
@@ -315,7 +316,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
         photar = photimag(1:ne)
         return
     else if (mode.eq.6) then
-        photar = photrms(1:ne)**2/2
+        photar = photpow(1:ne)
         return
     end if
 
