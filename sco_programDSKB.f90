@@ -6,7 +6,7 @@ IMPLICIT NONE
     REAL(WP) :: disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, DHext, eta_frac
     REAL(WP) :: Tsss(meshlog+4), Ssss(meshlog+4), Treal(meshlog+4), Sreal(meshlog+4)
     REAL(WP) :: Timag(meshlog+4), Simag(meshlog+4)
-    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
     REAL(WP), ALLOCATABLE :: bandwidth(:,:), fracrms(:), plag_scaled(:), SSS_band(:),Re_band(:), Im_band(:)
     INTEGER :: Nsss, Nreal, Nimag, rows, dim_int
 
@@ -20,10 +20,11 @@ IMPLICIT NONE
     eta_frac      = 0.40 !
 
     CALL sco_MODEL_LOGdskb(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, DHext, eta_frac, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+      Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 
     write(*,*) 'dTe_mod = ', dTe_mod
     write(*,*) 'dTs_mod = ', dTs_mod
+    write(*,*) 'eta_int = ', eta_int
 
     rows = 100
     ALLOCATE(bandwidth(rows,2),fracrms(rows), plag_scaled(rows), SSS_band(rows),Re_band(rows), Im_band(rows))

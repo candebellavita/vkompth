@@ -1,5 +1,5 @@
 SUBROUTINE sco_MODEL_LOGdskb(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, DHext, eta_frac, Nsss, Ssss,Tsss, &
-  Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+  Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 USE iso_fortran_env, ONLY : WP => REAL64
 USE sco_global
 USE sco_arrays
@@ -37,7 +37,7 @@ IMPLICIT NONE
     COMPLEX(WP), DIMENSION(meshlog) :: solution, auxiliar, auxiliar2, auxiliar3
     COMPLEX(WP) :: dTe, dTs, dTesimps1, dTesimps2, dTssimps
     REAL(WP) :: dTesimps1_real, dTesimps2_real, dTesimps1_imag, dTesimps2_imag, dTssimps_real, dTssimps_imag
-    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 !    REAL(WP), DIMENSION(:), ALLOCATABLE :: x2 , x_use , L, U, D, CC, n0
 
     call sco_constants(dist, mass, time, energy_norm,  eV2J, keV2J, MeV2J, J2keV, Etrans, kbol, hplanck, c, cc2, me, sigma, stau)
@@ -196,6 +196,8 @@ IMPLICIT NONE
     eta = eta_frac * eta_max
     denom = dcmplx(4. * factor1 * Iex01 , - (3. / 2.) * omega * Tcorona)     ! denominator in eq (A6) of Karpouzas et al 2019
 
+    eta_int = eta ! we record eta_int (\tilde\eta)
+
     k0 = DHext * Hexo0 / denom
     k1 = -4. * factor1 / denom
     k2 = factor1 / denom
@@ -229,8 +231,8 @@ IMPLICIT NONE
     surf = 4. * pi * rad_sphere ** 2
     vect4 = x2 * n0/ Nescp
     CALL sco_SIMPSON(meshlog,vect4,xlog,corona_simps)
-    corona_Lum = surf * (1. - eta) * c * nc * Tcorona ** 2 * corona_simps   ! this is probably wrong
-    corona_Lum_out = corona_Lum * keV2J / (time * Etrans)
+    !corona_Lum = surf * (1. - eta) * c * nc * Tcorona ** 2 * corona_simps   ! this is probably wrong
+    !corona_Lum_out = corona_Lum * keV2J / (time * Etrans)
 
     ! Vector to go from grid units to physical units in ph cm^-2 s^-1 keV^-1 @ 1kpc
     area = 4. * pi * (3e19/dist) **2

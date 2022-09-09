@@ -1,4 +1,4 @@
-SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
+SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
     IMPLICIT NONE
     INTEGER ifl,ne,mesh_size,i,ENEMAX, MAXNE, mode, neRef, NX, nestsol, ier
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000, NX=299)
@@ -173,7 +173,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
         tau = sqrt(2.25+3./((kTe1 / 511.)*((gam1+0.5)**2-2.25))) - 1.5
     endif
 
-    CALL sco_MODEL_LOGbb(af, Lsize1, kTe1, kTs1, tau, qpo_freq, DHext1, eta1, Nsss, Ssss,Tsss, &
+    CALL sco_MODEL_LOGdskb(af, Lsize1, kTe1, kTs1, tau, qpo_freq, DHext1, eta1, Nsss, Ssss,Tsss, &
       Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1)
 
     write(dTe1mod,*) dTe1_mod
@@ -230,7 +230,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
         tau = sqrt(2.25+3./((kTe2 / 511.)*((gam2+0.5)**2-2.25))) - 1.5
     endif
 
-    CALL sco_MODEL_LOGbb(af, Lsize2, kTe2, kTs2, tau, qpo_freq, DHext2, eta2, Nsss, Ssss, &
+    CALL sco_MODEL_LOGdskb(af, Lsize2, kTe2, kTs2, tau, qpo_freq, DHext2, eta2, Nsss, Ssss, &
     Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2)
 
     write(dTe2mod,*) dTe2_mod

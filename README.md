@@ -1,6 +1,6 @@
 # vKompth
 
-This is the Fortran version of the [vKompth](https://github.com/candebellavita/vkompth) code from [Bellavita et al. 2022, MNRAS in press](https://arxiv.org/abs/2206.13609) which was originally developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/abstract) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/abstract).
+This is the Fortran version of the [vKompth](https://github.com/candebellavita/vkompth) code from [Bellavita et al. 2022, MNRAS 515, 2099](https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2099B/) which was originally developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/).
 
 
 ## Requirements
@@ -25,7 +25,7 @@ setenv OPENBLAS_NUM_THREADS 2  #(CSH version)
 
 ## Run the *python* wrapper
 
-Go into `pyvkompth` subdirectory and run `python3 pyvkompth.py`. A GUI will load plotting both *rms* and *lags* for `vkompthbb` and `vkompthdk` model variants, allowing to modify parameters on-the-fly with intereactive sliders.
+Go into `pyvkompth` subdirectory and run `python3 pyvkompth.py`. A GUI will load plotting both *rms* and *lags* for `vkompthbb` and `vkompthdk` model variants, allowing to modify parameters on-the-fly with interactive sliders.
 
 
 ## Load and run the *XSPEC* models
@@ -38,7 +38,7 @@ lmod vkompthbb /PATHTO/vkompthbb/
 
 Alternatively, the four model variants can be loaded using the `XSPEC` script provided as `@load_vkompth.xcm`. This script also includes plotting commands like `plrl` which can be used to produce a fancy plot for both *rms* and *lags* in *XSPEC* if data are loaded as `data 1:1 rms.pha 2:2 lag.pha`.
 
-Examples of those can be found under the `MAXI_J1348-630` subdirectoy, which correspond to data published under *Bellavita et al. 2022 (subm. to MNRAS)*.
+Examples of those can be found under the `MAXI_J1348-630` subdirectory, which correspond to data published under [Bellavita et al. 2022, MNRAS 515, 2099](https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2099B/).
 
 
 ## Preparing your own data
@@ -48,4 +48,4 @@ We also provide a `bash` script named `asciiTOvkompth.sh`, which uses `FTOOLS` t
 
 ## Questions, comments, issues
 
-For questions, comments and issues, please contact the authors of *Bellavita et al. 2022 (subm. to MNRAS)* preferably through the [vKompth GitHub](https://github.com/candebellavita/vkompth).
+For questions, comments and issues, please contact the authors of [Bellavita et al. 2022, MNRAS 515, 2099](https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2099B/) preferably through the [vKompth GitHub](https://github.com/candebellavita/vkompth).

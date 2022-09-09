@@ -13,10 +13,10 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4)
-    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 
-    character*(128) dTemod,dTsmod,pdTemod,pdTsmod
-    
+    character*(128) dTemod,dTsmod,pdTemod,pdTsmod,etaint,petaint
+
     INTEGER Nsss, Nreal, Nimag, dim_int, i, j, mode, neRef, ier
     DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     LOGICAL samecall
@@ -26,6 +26,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
 !    INTEGER :: DGNFLT
 
     DATA pdTemod,pdTsmod/'dTe_mod','dTs_mod'/
+    DATA petaint/'eta_int'/
     DATA firstcall/.true./
     !This model does not return model variances.
     photer = 0
@@ -104,6 +105,9 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
                 !write(*,*) 'Imag...'
                 photar = photimag(1:ne)
                 return
+            else if (mode.eq.6) then
+                photar = photrms(1:ne)**2/2
+                return
             end if
     end if
 
@@ -140,12 +144,14 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGdskb(disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 
     write(dTemod,*) dTe_mod
     call fpmstr(pdTemod,dTemod)
     write(dTsmod,*) dTs_mod
     call fpmstr(pdTsmod,dTsmod)
+    write(etaint,*) eta_int
+    call fpmstr(petaint,etaint)
 
     IF (ne .LT. ENEMAX) THEN
         neRef = ne+1
@@ -218,6 +224,9 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
         return
     else if (mode.eq.5) then
         photar = photimag(1:ne)
+        return
+    else if (mode.eq.6) then
+        photar = photrms(1:ne)**2/2
         return
     end if
 

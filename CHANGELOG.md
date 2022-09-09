@@ -1,3 +1,12 @@
+Version 1.1.1
+=============
+
+Added `xset` *eta* variables to be able to recover the
+internal value of `\tilde\eta` for each model version.
+
+Added `power` mode, to match Lorentzian normalizations
+fitted with XSPEC to the QPOs in the PDS.
+
 Version 1.1.0
 =============
 

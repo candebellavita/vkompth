@@ -17,10 +17,10 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX+1), XM(NX)
     DOUBLE PRECISION :: Xmin, Xmax
 
-    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out
-    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out
-    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod
-    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod
+    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1
+    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2
+    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod,etaint1,petaint1
+    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod,etaint2,petaint2
 
     INTEGER Nsss, Nreal, Nimag, dim_int
     DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
@@ -39,6 +39,7 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
 
     DATA pdTe1mod,pdTs1mod/'dTe1_mod','dTs1_mod'/
     DATA pdTe2mod,pdTs2mod/'dTe2_mod','dTs2_mod'/
+    DATA petaint1,petaint2/'eta_int1','eta_int2'/
     DATA firstcall/.true./
 
     cj = (0.0,1.0)
@@ -124,6 +125,9 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
                 !write(*,*) 'Imag...'
                 photar = photimag(1:ne)
                 return
+            else if (mode.eq.6) then
+                photar = photrms(1:ne)**2/2
+                return
             end if
     end if
 
@@ -170,12 +174,14 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGdskb(af, Lsize1, kTe1, kTs1, tau, qpo_freq, DHext1, eta1, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out)
+      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1)
 
     write(dTe1mod,*) dTe1_mod
     call fpmstr(pdTe1mod,dTe1mod)
     write(dTs1mod,*) dTs1_mod
     call fpmstr(pdTs1mod,dTs1mod)
+    write(etaint1,*) eta_int1
+    call fpmstr(petaint1,etaint1)
 
     dim_int = mesh_size+4
 
@@ -222,12 +228,14 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGdskb(af, Lsize2, kTe2, kTs2, tau, qpo_freq, DHext2, eta2, Nsss, Ssss, &
-    Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out)
+    Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2)
 
     write(dTe2mod,*) dTe2_mod
     call fpmstr(pdTe2mod,dTe2mod)
     write(dTs2mod,*) dTs2_mod
     call fpmstr(pdTs2mod,dTs2mod)
+    write(etaint2,*) eta_int2
+    call fpmstr(petaint2,etaint2)
 
     IF (ne .LT. ENEMAX) THEN
         DO I= 1, NX
@@ -302,6 +310,9 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
         return
     else if (mode.eq.5) then
         photar = photimag(1:ne)
+        return
+    else if (mode.eq.6) then
+        photar = photrms(1:ne)**2/2
         return
     end if
 
