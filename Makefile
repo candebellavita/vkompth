@@ -1,8 +1,8 @@
 .SUFFIXES:
 FC := gfortran
 FCFLAGS := $(FCFLAGS) -O5 -Wall -fPIC
-LDFLAGS := $(LDFLAGS) -L/usr/local/include
-LDLIBS := $(LDLIBS) -lopenblas
+LDFLAGS = -L/usr/local/include
+LDLIBS = -lopenblas
 
 DEPSDIR := ./dependencies
 
