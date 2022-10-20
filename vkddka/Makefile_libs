@@ -7,7 +7,7 @@ LDLIBS = -lopenblas
 
 #library definition
 
-HD_LIBRARY_ROOT		= vkompthdk
+HD_LIBRARY_ROOT		= vkddka
 
 HD_LIB_STYLE		= shared
 
@@ -26,7 +26,7 @@ HD_LIBRARY_SRC_f	= ../dependencies/sco_curfit.f \
  ../dependencies/sco_fprati.f \
  ../xsdskb.f
 
-HD_LIBRARY_SRC_f90	= vkompthdk.f90 \
+HD_LIBRARY_SRC_f90	= vkddka.f90 \
  ../sco_global.f90 \
  ../sco_arrays.f90 \
  ../sco_simpson.f90 \
@@ -41,8 +41,8 @@ HD_LIBRARY_SRC_c	=
 
 HD_LIBRARY_SRC_C	=
 
-HD_LIBRARY_SRC_cxx	= lpack_vkompthdk.cxx \
-			  vkompthdkFunctionMap.cxx
+HD_LIBRARY_SRC_cxx	= lpack_vkddka.cxx \
+			  vkddkaFunctionMap.cxx
 
 HD_LIBRARY_SRC_cpp	=
 

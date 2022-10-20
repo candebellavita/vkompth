@@ -2,6 +2,9 @@ HD_COMPONENT_NAME	= Xspec
 
 HD_COMPONENT_VERS	=
 
+LDFLAGS = -L/usr/local/include
+LDLIBS = -lopenblas
+
 #library definition
 
 HD_LIBRARY_ROOT		= vkdualdk
@@ -82,6 +85,6 @@ HD_CLEAN		= lpack_${HD_LIBRARY_ROOT}.cxx \
 HD_SHLIB_LIBS           = ${HD_LFLAGS} -l${CCFITS} -l${CFITSIO} -lXS \
                           -lXSUtil -lXSFunctions -lXSModel -l${TCL} \
                           -l${HEAUTILS} ${HD_STD_LIBS} ${SYSLIBS} ${F77LIBS4C} \
-                          -lopenblas
+                          $(LDFLAGS) $(LDLIBS)
 
 include ${HD_STD_MAKEFILE}

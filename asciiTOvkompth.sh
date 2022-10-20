@@ -175,6 +175,28 @@ then
   echo '              were succesfully added.'
   echo ''
 
+elif [ $2 == 'power' ]
+	then
+		fparkey "mode: 6" ${ascii}.pha XFLT0001 add=yes comm='Spectrum type'
+	        if [ $? -ne 0 ]; then
+						 echo
+	           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+						 echo
+	           exit
+	        fi
+		fparkey "QPO: "$3"" ${ascii}.pha XFLT0002 add=yes comm='QPO frequency [Hz]'
+	        if [ $? -ne 0 ]; then
+						 echo
+	           echo '  ERROR: fparkey command failed on file' ${ascii}.pha
+						 echo
+	           exit
+	        fi
+
+		echo ''
+		echo '   Keywords Mode: 6 (power) ; QPO: '$3' Hz'
+	  echo '              were succesfully added.'
+	  echo ''
+
 else
 	echo ''
 	echo ' ASCII file was converted to pha/rmf but KEYWORDS were not added to the spectrum.'

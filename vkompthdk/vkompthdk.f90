@@ -6,17 +6,17 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: ear(0:ne), param(8), photar(ne), photer(ne)
     LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE), photpow(MAXNE)
     DOUBLE PRECISION, save :: pkTs, pkTe, pgam, psize, peta_frac, pqpo_freq, paf, pDHext, pear(0:MAXNE)
 
     DOUBLE PRECISION :: af, Lsize, kTe, kTs, gam, reflag, sss_norm
     DOUBLE PRECISION :: disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4)
-    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 
-    character*(128) dTemod,dTsmod,pdTemod,pdTsmod
-    
+    character*(128) dTemod,dTsmod,pdTemod,pdTsmod,etaint,petaint
+
     INTEGER Nsss, Nreal, Nimag, dim_int, i, j, mode, neRef, ier
     DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     LOGICAL samecall
@@ -26,6 +26,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
 !    INTEGER :: DGNFLT
 
     DATA pdTemod,pdTsmod/'dTe_mod','dTs_mod'/
+    DATA petaint/'eta_int'/
     DATA firstcall/.true./
     !This model does not return model variances.
     photer = 0
@@ -66,7 +67,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     end if
 
     mode = int(DGFILT(ifl, 'mode'))
-    if ((mode.lt.0.99).OR.(mode.gt.5.01)) mode=0
+    if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(8)
     qpo_freq = DGFILT(ifl, 'QPO')
 
@@ -104,6 +105,9 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
                 !write(*,*) 'Imag...'
                 photar = photimag(1:ne)
                 return
+            else if (mode.eq.6) then
+                photar = photpow(1:ne)
+                return
             end if
     end if
 
@@ -140,12 +144,14 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGdskb(disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 
     write(dTemod,*) dTe_mod
     call fpmstr(pdTemod,dTemod)
     write(dTsmod,*) dTs_mod
     call fpmstr(pdTsmod,dTsmod)
+    write(etaint,*) eta_int
+    call fpmstr(petaint,etaint)
 
     IF (ne .LT. ENEMAX) THEN
         neRef = ne+1
@@ -167,6 +173,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
         ENDIF
 
         photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+        photpow = 0.5*fracrms(2:ne+1)**2*(ear(1:ne)-ear(0:ne-1))
         photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
         photsss = SSS_band(2:ne+1)/sss_norm
         photreal = Re_band(2:ne+1)/sss_norm
@@ -195,6 +202,7 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
             DO J = 2, ENEMAX-1
                 IF (ear(I) .LE. bwRef(J, 2) .AND. ear(I) .GE. bwRef(J, 1)) THEN
                     photrms(i) = fracrms(J)*(ear(I)-ear(I-1))
+                    photpow(i) = 0.5*fracrms(J)**2*(ear(I)-ear(I-1))
                     photlags(i) = plag_scaled(J)*(ear(I)-ear(I-1))
                     photsss(i) = SSS_band(J)/sss_norm
                     photreal(i) = Re_band(J)/sss_norm
@@ -218,6 +226,9 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
         return
     else if (mode.eq.5) then
         photar = photimag(1:ne)
+        return
+    else if (mode.eq.6) then
+        photar = photpow(1:ne)
         return
     end if
 

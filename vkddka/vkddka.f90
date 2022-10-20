@@ -1,4 +1,4 @@
-SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
+SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
     IMPLICIT NONE
     INTEGER ifl,ne,mesh_size,i,ENEMAX, MAXNE, mode, neRef, NX, nestsol, ier
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000, NX=299)
@@ -219,6 +219,9 @@ SUBROUTINE vkdualdk(ear,ne,param,IFL,photar,photer)
     DHext2 = param(13)
     phi = param(14)
     qpo_freq = pqpo_freq
+
+    ! We obtain a2 (r_in,2) from a1, kTs1 and kTs2, consistently.
+    af = af * (kTs1/kTs2)**(4./3.)
 
     ! If gamma<0 then, it is -tau. Otherwise, we get tau from kTe and gamma.
     if (gam2.lt.0) then

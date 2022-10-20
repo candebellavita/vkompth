@@ -1,0 +1,12 @@
+!    -*- f90 -*-
+python module vkddka ! in
+    interface  ! in :vkddka
+        subroutine vkddka(ear,ne,param,ifl,photar,photer) ! in :vkddka:vkddka.f90
+            real*8 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*8 dimension(15),intent(in) :: param
+            integer intent(in) :: ifl, ne
+            real*8 dimension(ne),intent(out),depend(ne) :: photar
+            real*8 dimension(ne),intent(out),depend(ne) :: photer
+        end subroutine vkddka
+    end interface
+end python module vkddka

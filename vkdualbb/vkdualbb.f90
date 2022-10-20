@@ -6,7 +6,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION ear(0:ne), param(15), photar(ne), photer(ne)
     LOGICAL, save :: firstcall
     INTEGER, save :: pne
-    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
+    DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE), photpow(MAXNE)
     DOUBLE PRECISION, save :: pkTs1, pkTe1, pgam1, pLsize1, peta1, pqpo_freq, paf, pDHext1, pear(0:MAXNE)
     DOUBLE PRECISION, save :: pkTs2, pkTe2, pgam2, pLsize2, peta2, pDHext2, pphi
 
@@ -17,10 +17,10 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX+1), XM(NX)
     DOUBLE PRECISION :: Xmin, Xmax
 
-    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out
-    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out
-    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod
-    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod
+    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1
+    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2
+    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod,etaint1,petaint1
+    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod,etaint2,petaint2
 
     INTEGER Nsss, Nreal, Nimag, dim_int
     DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
@@ -39,6 +39,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
 
     DATA pdTe1mod,pdTs1mod/'dTe1_mod','dTs1_mod'/
     DATA pdTe2mod,pdTs2mod/'dTe2_mod','dTs2_mod'/
+    DATA petaint1,petaint2/'eta_int1','eta_int2'/
     DATA firstcall/.true./
 
     cj = (0.0,1.0)
@@ -84,7 +85,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     end if
 
     mode = int(DGFILT(ifl, 'mode'))
-    if ((mode.lt.0.99).OR.(mode.gt.5.01)) mode=0
+    if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(15)
     qpo_freq = DGFILT(ifl, 'QPO')
     samecall = .FALSE.
@@ -123,6 +124,9 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
             else if (mode.eq.5) then
                 !write(*,*) 'Imag...'
                 photar = photimag(1:ne)
+                return
+            else if (mode.eq.6) then
+                photar = photpow(1:ne)
                 return
             end if
     end if
@@ -170,12 +174,14 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGbb(af, Lsize1, kTe1, kTs1, tau, qpo_freq, DHext1, eta1, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out)
+      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1)
 
     write(dTe1mod,*) dTe1_mod
     call fpmstr(pdTe1mod,dTe1mod)
     write(dTs1mod,*) dTs1_mod
     call fpmstr(pdTs1mod,dTs1mod)
+    write(etaint1,*) eta_int1
+    call fpmstr(petaint1,etaint1)
 
     dim_int = mesh_size+4
 
@@ -214,6 +220,9 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     phi = param(14)
     qpo_freq = pqpo_freq
 
+    ! We obtain a2 (r_in,2) from a1, kTs1 and kTs2, consistently.
+    af = af * (kTs1/kTs2)**(4./3.)
+
     ! If gamma<0 then, it is -tau. Otherwise, we get tau from kTe and gamma.
     if (gam2.lt.0) then
         tau = -gam2
@@ -222,12 +231,14 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     endif
 
     CALL sco_MODEL_LOGbb(af, Lsize2, kTe2, kTs2, tau, qpo_freq, DHext2, eta2, Nsss, Ssss, &
-    Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out)
+    Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2)
 
     write(dTe2mod,*) dTe2_mod
     call fpmstr(pdTe2mod,dTe2mod)
     write(dTs2mod,*) dTs2_mod
     call fpmstr(pdTs2mod,dTs2mod)
+    write(etaint2,*) eta_int2
+    call fpmstr(petaint2,etaint2)
 
     IF (ne .LT. ENEMAX) THEN
         DO I= 1, NX
@@ -282,6 +293,7 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
     ENDIF
 
     photrms = fracrms(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
+    photpow = 0.5*fracrms(2:ne+1)**2*(ear(1:ne)-ear(0:ne-1))
     photlags = plag_scaled(2:ne+1)*(ear(1:ne)-ear(0:ne-1))
     photsss = SSS_band(2:ne+1)/sss_norm
     photreal = Re_band(2:ne+1)/sss_norm
@@ -302,6 +314,9 @@ SUBROUTINE vkdualbb(ear,ne,param,IFL,photar,photer)
         return
     else if (mode.eq.5) then
         photar = photimag(1:ne)
+        return
+    else if (mode.eq.6) then
+        photar = photpow(1:ne)
         return
     end if
 

@@ -1,5 +1,5 @@
 SUBROUTINE sco_MODEL(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, DHext, eta_frac, Nsss, Ssss,Tsss, &
-  Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+  Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 USE iso_fortran_env, ONLY : WP => REAL64
 USE sco_global
 USE sco_arrays
@@ -33,7 +33,7 @@ IMPLICIT NONE
     COMPLEX(WP), DIMENSION(mesh_size) :: solution, auxiliar, auxiliar2, auxiliar3
     COMPLEX(WP) :: dTe, dTs, dTesimps1, dTesimps2, dTssimps
     REAL(WP) :: dTesimps1_real, dTesimps2_real, dTesimps1_imag, dTesimps2_imag, dTssimps_real, dTssimps_imag
-    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 !    REAL(WP), DIMENSION(:), ALLOCATABLE :: x2 , x_use , L, U, D, CC, n0
 
     call sco_constants(dist, mass, time, energy_norm,  eV2J, keV2J, MeV2J, J2keV, Etrans, kbol, hplanck, c, cc2, me, sigma, stau)
@@ -177,6 +177,8 @@ IMPLICIT NONE
     eta_max = c11 / Iex03
     eta = eta_frac * eta_max
     denom = dcmplx(4. * factor1 * Iex01 , - (3. / 2.) * omega * Tcorona)     ! denominator in eq (A6) of Karpouzas et al 2019
+
+    eta_int = eta ! we record eta_int (\tilde\eta)
 
     k0 = DHext * Hexo0 / denom
     k1 = -4. * factor1 / denom

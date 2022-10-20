@@ -46,6 +46,9 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
             !write(*,*) 'Imag...'
             photar = photimag(1:ne)
             return
+        else if (ifl.eq.6) then
+            photar = photrms(1:ne)**2/2
+            return
         end if
     else
         !write(*,*) pkTs, pkTe, ptau, psize, peta_frac, pqpo_freq, paf
@@ -133,6 +136,9 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
         return
     else if (ifl.eq.5) then
         photar = photimag(1:ne)
+        return
+    else if (ifl.eq.6) then
+        photar = photrms(1:ne)**2/2
         return
     end if
 
