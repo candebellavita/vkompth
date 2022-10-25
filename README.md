@@ -5,11 +5,11 @@ This is the Fortran version of the [vKompth](https://github.com/candebellavita/v
 
 ## Requirements
 
-In order to invert the matrix of the linear problem, `vKompth` requires the `DGTSV`, `ZGETRF` and `ZGETRS` routines from the [Lapack](https://www.netlib.org/lapack) or [openBLAS](https://www.openblas.net/) libraries, which have to be installed in your system. Before compiling the code check the `lopenblas` choice under the `LDFLAGS` variable in the `Makefile` and change it to `lopenblas`, `lopenblasp` or `llapack`, depending the one you have installed in your system.
+In order to invert the matrix of the linear problem, `vKompth` requires the `DGTSV`, `ZGETRF` and `ZGETRS` routines from the [Lapack](https://www.netlib.org/lapack) or [openBLAS](https://www.openblas.net/) libraries, which have to be installed in your system. Before compiling the code check the `lopenblas` choice under the `LDLIBS` variable in the `Makefile` and change it to `lopenblas`, `lopenblasp` or `llapack`, depending the one you have installed in your system, and `LDFLAGS` to the directory where the library is installed.
 
 Make sure you have [HEASOFT](https://heasarc.gsfc.nasa.gov/lheasoft/) installed from the source version, and set it up before compiling the *XSPEC* models. This model has to be compiled with the same compiler version used for *HEASOFT* to ensure compatibility. Read the *HEASOFT* pages about compilers.
 
-In order to compile the *python* wrappers, you need to have a working `python3` environment set up, including `numpy` and `matplotlib` libraries.
+In order to compile the *python* wrappers, you need to have a working `python3` environment set up, including `numpy` and `matplotlib` packages.
 
 
 ## Compile the main code, *XSPEC* models and *python* wrapper

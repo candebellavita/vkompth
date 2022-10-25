@@ -4,6 +4,8 @@ FCFLAGS := $(FCFLAGS) -O5 -Wall -fPIC
 LDFLAGS = -L/usr/local/include
 LDLIBS = -lopenblas
 
+OS := $(shell uname -s)
+
 DEPSDIR := ./dependencies
 
 DEPSSRC := $(shell find $(DEPSDIR)/ -name \*.f)
@@ -42,22 +44,40 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #	$(FC) $(FCFLAGS) -c $<
 
 
-all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompthbb vkompthdk vkdualbb vkdualdk vkddka pyvkompth
+all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk makefile_libs vkompthbb vkompthdk vkdualbb vkdualdk vkddka pyvkompth
 
 model: vkompth_lin vkompth_log vkompth_bb vkompth_dk
 
-wrappers: loader version vkompthbb vkompthdk vkdualbb vkdualdk vkddka pyvkompth
+wrappers: loader version makefile_libs vkompthbb vkompthdk vkdualbb vkdualdk vkddka pyvkompth
 
 loader:
 	@echo "\nApply PATHTO to load_vkompth.xcm...\n"
-	sed -i "s|/PATHTO|$$(pwd)|g" load_vkompth.xcm
-  #For MAC, use: 	sed -i '' "s|/PATHTO|$$(pwd)|g" load_vkompth.xcm
+	sed "s|/PATHTO|$$(pwd)|g" load_vkompth.xcm > load_vkompth.tmp; mv load_vkompth.tmp load_vkompth.xcm
 	@echo "\n   ... Done.\n\n"
 
 version:
-	@echo "\nApply VERSION number to XSPEC model wrappers...\n"
-	sed -i s/VERSION/$$(cat VERSION)/g */*.f90
-  #For MAC, use: 	sed -i '' s/VERSION/$$(cat VERSION)/g */*.f90
+	@echo "\nApply VERSION number $$(cat VERSION) to XSPEC model wrappers...\n"
+	for f90 in $(shell ls */*.f90); do echo $$f90; sed s/VERSION/$$(cat VERSION)/g $$f90 > $$f90.tmp; mv $$f90.tmp $$f90; done
+	@echo "\n   ... Done.\n\n"
+
+makefile_libs:
+	@echo "\nApply LDFLAGS and LDLIBS variables to wrappers Makefile_libs files...\n"
+	cd vkompthbb; \
+	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	cd ../vkompthdk; \
+	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	cd ../vkdualbb; \
+	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	cd ../vkdualdk; \
+	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	cd ../vkddka ; \
+	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	cd .. ;
 	@echo "\n   ... Done.\n\n"
 
 vkompth_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
@@ -89,11 +109,11 @@ vkddka:
 
 pyvkompth:
 	cd pyvkompth; \
-	python -m numpy.f2py -lopenblas -c pyvkompthbb.pyf pyvkompthbb.f90 \
+	python -m numpy.f2py $(LDFLAGS) $(LDLIBS) -c pyvkompthbb.pyf pyvkompthbb.f90 \
 	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
 	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
 	   ../sco_model_LOGbb.f90 ../dependencies/*.f ../xsbbrd.f; \
-	python -m numpy.f2py -lopenblas -c pyvkompthdk.pyf pyvkompthdk.f90 \
+	python -m numpy.f2py $(LDFLAGS) $(LDLIBS) -c pyvkompthdk.pyf pyvkompthdk.f90 \
 	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
 	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
 	   ../sco_model_LOG_dskb.f90 ../dependencies/*.f ../xsdskb.f; cd ..

@@ -1,8 +1,8 @@
 # Instructions for Compilation under XSPEC
 
 1) First load HEASOFT (heainit, export, etc...).
-2) Edit the Makefile_libs "lopenblas" to your preferred value
-   (lopenblas, lopenblasp, llapack, etc).
+2) Edit the Makefile_libs LDFLAGS and LDLIBS variables
+   to your preferred values (lopenblas, lopenblasp, llapack, etc).
 3) Then, run:
 
 ```
@@ -12,7 +12,7 @@ hmake
 ```
 
 We use Makefile_libs to inject all the dependencies of our
-XPEC model with the files on the top dir, and openblas
+XSPEC model with the files on the top dir, and openblas
 library for multithreading.
 
 3) Before running XSPEC, please set your `OPENBLAS_NUM_THREADS`
