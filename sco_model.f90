@@ -19,68 +19,47 @@ IMPLICIT NONE
     REAL(WP) :: L(mesh_size-3), U(mesh_size-3), D(mesh_size-2), CC(mesh_size-2), n0(mesh_size)
     !parameters perturbative solution
     REAL(WP) :: Nescp(mesh_size), c2p(mesh_size), dn0(mesh_size), dn02(mesh_size)
-    REAL(WP) :: KNp_int(mesh_size), Hexo0(mesh_size-2), eta_max, eta, transf
+    REAL(WP) :: KNp_int(mesh_size), Hexo0, eta_max, eta, transf
     REAL(WP) :: x_use_square(mesh_size-2), powerfact(mesh_size-2), x2square(mesh_size), exp1(mesh_size-2), exp2(mesh_size-2)
     REAL(WP) :: L_subsol(mesh_size-3), U_subsol(mesh_size-3), L_dn0(mesh_size-3), U_dn0(mesh_size-3), Nescp_use(mesh_size-2)
-    REAL(WP) :: Q1(mesh_size-2), Q2(mesh_size-2), Q3(mesh_size-2), stau_kn(mesh_size-2), factor1(mesh_size-2)
+    REAL(WP) :: Q1(mesh_size-2), Q2(mesh_size-2), Q3(mesh_size-2), stau_kn(mesh_size-2), factor1
     REAL(WP) :: A1(mesh_size-2), A2(mesh_size-2), p1, x2_withunit(mesh_size), rad_sphere, surf, corona_simps
     REAL(WP) :: corona_Lum, corona_Lum_out, vect4(mesh_size), Iex01, Iex02, Iex03
     REAL(WP) :: area, tc, to_phys, vect1(mesh_size-2), vect2(mesh_size-2), vect3(mesh_size-2), x2_trans(mesh_size)
     REAL(WP) :: SOLsss(mesh_size), SOLreal(mesh_size), SOLimag(mesh_size), Tsss(mesh_size+4), Ssss(mesh_size+4)
     REAL(WP) :: Treal(mesh_size+4), Sreal(mesh_size+4), Timag(mesh_size+4), Simag(mesh_size+4)
     COMPLEX(WP), DIMENSION(mesh_size-3) :: Lp, Up
-    COMPLEX(WP), DIMENSION(mesh_size-2) :: Dp, denom, k0, k1, k2, sol_ongrid
+    COMPLEX(WP), DIMENSION(mesh_size-2) :: Dp, sol_ongrid, k0n
     COMPLEX(WP), DIMENSION(mesh_size) :: solution, auxiliar, auxiliar2, auxiliar3
-    COMPLEX(WP) :: dTe, dTs, dTesimps1, dTesimps2, dTssimps
+    COMPLEX(WP) :: dTe, dTs, dTesimps1, dTesimps2, dTssimps, denom, k0, k1, k2
     REAL(WP) :: dTesimps1_real, dTesimps2_real, dTesimps1_imag, dTesimps2_imag, dTssimps_real, dTssimps_imag
     REAL(WP) :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 !    REAL(WP), DIMENSION(:), ALLOCATABLE :: x2 , x_use , L, U, D, CC, n0
 
     call sco_constants(dist, mass, time, energy_norm,  eV2J, keV2J, MeV2J, J2keV, Etrans, kbol, hplanck, c, cc2, me, sigma, stau)
-!ccccccccccc QUIZAS ESTO CONVENGA PONERLO ANTES DE ESTA SUBRUTINA, CUANDO LE PASO EL MESH_SIZE PARA NO TENER COMPONENTES EXTRA EN X Y X_USE ccccccccccccc
-
-!    !The Simpson method requires an odd number of mesh points
-!    if (mod(mesh_size,2).EQ.0) THEN
-!    mesh_size = mesh_size - 1
-!    end if
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
-    ! We define the energy regime for the BVP solution
+!---We define the energy regime for the BVP solution
     Emin_adim = 1.e-3
     Emax_adim = 40.
     Emin = Emin_adim * Tcorona
     Emax = Emax_adim * Tcorona
 
-    ! the output is the X array, whose components are evenly spaced numbers between Emin/Tcorona and Emax/Tcorona
+!---The output is the X array, whose components are evenly spaced numbers between Emin/Tcorona and Emax/Tcorona
     CALL sco_linspace(Emin_adim, Emax_adim, mesh_size, X2)
 
-    ! param(1) = 2.872684
-    ! param(2) = 6.
-    ! param(3) = 0.7
-    ! param(4) = 0
-    ! param(5) = 0
-    ! near = mesh_size -1
-    ! ear = real(x2)*6.
-    ! ifl = 0
-    ! CALL donthcomp(ear,near,Param,Ifl,Photar,Photer)
-    ! open(unit=32, file='photar.dat')
-    ! do i=0, mesh_size-2
-    !   write(32,*) 0.5*(ear(i)+ear(i+1)), photar(i+1), 0.5*(-ear(i)+ear(i+1))
-    ! enddo
-    ! close(32)
 
-    ! We transform input parameters to the internal units
+!---We transform input parameters to the internal units
     Tcorona = Tcorona * Etrans
     Tdisk = Tdisk * Etrans
     disk_size = disk_size * 1000. * (1. / dist)
     corona_size = corona_size * 1000. * (1. / dist)
     QPO_frequency = QPO_frequency * time
 
-    ! We define the energy step size for the numerical integration
+!---We define the energy step size for the numerical integration
     dx = x2(4) - x2(3)
 
-    ! We define the integration limits for the energy averaged rms
+!---We define the integration limits for the energy averaged rms
     xtot_low = 2. * Etrans / Tcorona
     xtot_up = 60. * Etrans / Tcorona
 
@@ -88,37 +67,40 @@ IMPLICIT NONE
         x_use(i) = x2(i+1)
     ENDDO
 
-!--------BEGIN OF: construction of the steady state solution----------
+!---BEGIN OF: construction of the steady state solution----------
 
-    Ntri=mesh_size-2 !dimension of the x_use and then it will be the dimension of the tridiagonal matrix &
-                     !the constant vector of the system that we need to solve
+    Ntri=mesh_size-2 		!dimension of the x_use and then it will be the dimension of the tridiagonal matrix &
+                     		!the constant vector of the system that we need to solve
 
     CALL sco_par(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, Ntri, x_use, c2, nc, c5, c6, c11, Nesc, &
      Vc, KN_corr_interpol)
     omega = 2.0 * PI * QPO_frequency
 
-    ! preparing to solve the steady state Kompaneets equation (SS) after discretization
-    L = 1. / (dx * dx) - 1. / (2.0 * dx)  ! sub-diagonal elements: constant
-    D = -2. / (x_use * x_use) + 2. / x_use - c2 / (x_use * x_use) - 2. / (dx * dx)  ! diagonal elements: x-dependent
-    U = 1. / (dx * dx) + 1. / (2. * dx)  ! super-diagonal elements: constant
-    CC = -1. / (exp(x_use * (Tcorona / Tdisk)) - 1.)  ! vector of constants
+!---Preparing to solve the steady state Kompaneets equation (SS) after discretization
+    L = 1. / (dx * dx) - 1. / (2.0 * dx)  						! sub-diagonal elements: constant
+    D = -2. / (x_use * x_use) + 2. / x_use - c2 / (x_use * x_use) - 2. / (dx * dx)  	! diagonal elements: x-dependent
+    U = 1. / (dx * dx) + 1. / (2. * dx)  						! super-diagonal elements: constant
+    CC = -1. / (exp(x_use * (Tcorona / Tdisk)) - 1.)  					! vector of constants
 
     columns_CC=1
-    CALL dgtsv(Ntri, columns_CC, L, D, U, CC, Ntri, INFO)     ! on exit, CC has the solution of (LDU)*X=CC
-    n0(1) = 0.0
+    CALL dgtsv(Ntri, columns_CC, L, D, U, CC, Ntri, INFO)     				! on exit, CC has the solution of (LDU)*X=CC
+    n0(1) = 0.0									! boundary conditions
     n0(mesh_size) = 0.0
 
     DO I =1, Ntri
         n0(I+1) = CC(I)
     ENDDO
-    transf = Etrans/Tcorona ! parameter used to transform the input grid from keV to internal units
+    
+!--- n0 is the steady state solution
 
-!   Solution of the linearized equation
+    transf = Etrans/Tcorona 			! parameter used to transform the input grid from keV to internal units
+
+!---BEGIN OF: construction of the linearized equation
 
     CALL sco_par(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, mesh_size, x2, c2p, &
     nc, c5, c6, c11, Nescp, Vc, KNp_int)
 
-    ! We define the first and second order derivative of n0
+!---We define the first and second order derivative of n0
 
     dn0(1) = (-n0(3) + 4. * n0(2) - 3. * n0(1)) / (2. * dx)
     dn0(mesh_size) = (3. * n0(mesh_size) - 4. * n0(mesh_size-1) + n0(mesh_size-2)) / (2. * dx)
@@ -136,12 +118,11 @@ IMPLICIT NONE
         x2square(i) = (x2(i))**2
     ENDDO
 
+!---Argument of the exponentials in eq (A9) of Karpouzas et al 2019
     powerfact = Tcorona * x_use / Tdisk
-
 
     exp1 = 1. / (exp(powerfact) - 1)
     exp2 = 1. / (exp(powerfact) - 2. + exp(-powerfact))
-
 
 
     DO I = 1, Ntri-1
@@ -155,34 +136,30 @@ IMPLICIT NONE
     Lp = dcmplx(-1. + dx/2. + (L_dn0 * dx)/L_subsol , 0)
     Up = dcmplx(-1. - dx/2. - (U_dn0 * dx)/U_subsol , 0)
 
-    Q2 = x_use_square * CC
-    Q1 = x_use * CC
-    Q3 = Q1 / Nescp_use
+    stau_kn = (3. / 4.) * stau * KN_corr_interpol        	! KN_corr(x_use, Tcorona)  # klein Nishina correction
 
-    vect1 = CC * x_use
+    Q2 = x_use_square * CC * stau_kn
+    Q1 = x_use * CC * stau_kn
+    Q3 = x_use * CC / Nescp_use
+
+    vect1 = CC * x_use * stau_kn
     CALL sco_SIMPSON(Ntri,vect1,x_use,Iex01)
-    vect2 = CC * x_use_square
+    vect2 = CC * x_use_square * stau_kn
     CALL sco_SIMPSON(Ntri,vect2,x_use,Iex02)
     vect3 = CC * x_use/ Nescp_use
     CALL sco_SIMPSON(Ntri,vect3,x_use,Iex03)
-!    write(*,*) Iex01, Iex02, Iex03
 
-
-!    CALL arrdef(M, T, S)
-!    X_interpol = x_use * Tcorona / (me * cc2)
-!    CALL splev(t,M,s,k,X_interpol,KN_corr_interpol,Ntri,ier)
-    stau_kn = (3. / 4.) * stau * KN_corr_interpol        !KN_corr(x_use, Tcorona)  # klein Nishina correction
-    factor1 = ((Tcorona ** 3) * stau_kn * nc) / (me * c)
+    factor1 = ((Tcorona ** 3) * nc) / (me * c)
     Hexo0 = factor1 * (4. * Iex01 - Iex02)
     eta_max = c11 / Iex03
     eta = eta_frac * eta_max
     denom = dcmplx(4. * factor1 * Iex01 , - (3. / 2.) * omega * Tcorona)     ! denominator in eq (A6) of Karpouzas et al 2019
 
-    eta_int = eta ! we record eta_int (\tilde\eta)
+    eta_int = eta 	! we record eta_int (\tilde\eta)
 
-    k0 = DHext * Hexo0 / denom
-    k1 = -4. * factor1 / denom
-    k2 = factor1 / denom
+    k0 = DHext * Hexo0 / denom			! first term in eq (A6) of Karpouzas et al 2019
+    k1 = -4. * factor1 / denom			! multiplicative factor of the 3rd term in eq (A6) of Karpouzas et al 2019
+    k2 = factor1 / denom			! multiplicative factor of the 2nd term in eq (A6) of Karpouzas et al 2019
 
     DO I = 1, Ntri
     A1(I) = (dx**2) * (-2. / x_use_square(I) + dn02(I+1) / CC(I))
@@ -190,21 +167,22 @@ IMPLICIT NONE
 
     A2 = (dx**2) * (powerfact * exp2 / CC)
 
-    ! Calculation of the solution
-    p1 = c6 * eta
 
+    p1 = c6 * eta		! multiplicative factor in eq (A7) of Karpouzas et al 2019 
+    k0n = k0 			! the mppinv needs a vector
+!---Calculation of the solution
+    CALL sco_MPPINV(Lp, Dp, Up, p1, A1, A2, k0n, k1, k2, Q1, Q2, Q3, dx, Ntri, sol_ongrid)
 
-    CALL sco_MPPINV(Lp, Dp, Up, p1, A1, A2, k0, k1, k2, Q1, Q2, Q3, dx, Ntri, sol_ongrid)
-
-    solution(1) = (0,0)
+    solution(1) = (0,0)				! boundary conditions
     solution(mesh_size) = (0,0)
     DO I = 1, Ntri
          solution(i+1) = sol_ongrid(i)
     ENDDO
+    
     SOLreal = REALPART(solution)
     SOLimag = IMAGPART(solution)
 
-    x2_withunit = x2 * Tcorona     ! energy grid in internal units
+    x2_withunit = x2 * Tcorona    			! energy grid in internal units
     rad_sphere = disk_size + corona_size
     surf = 4. * pi * rad_sphere ** 2
     vect4 = x2 * n0/ Nescp
@@ -212,25 +190,20 @@ IMPLICIT NONE
     corona_Lum = surf * (1. - eta) * c * nc * Tcorona ** 2 * corona_simps   ! this is probably wrong
     corona_Lum_out = corona_Lum * keV2J / (time * Etrans)
 
-    ! Vector to go from grid units to physical units in ph cm^-2 s^-1 keV^-1 @ 1kpc
+!---Vector to go from grid units to physical units in ph cm^-2 s^-1 keV^-1 @ 1kpc
     area = 4. * pi * (3e19/dist) **2
     tc = disk_size / (c * tau)
     to_phys = (1.-eta)*Vc*nc/area/(tau+tau**2/3)/tc
     to_phys = to_phys* 1e-4 / dist**2 /time * Etrans
 
-    transf = Etrans/Tcorona ! parameter used to transform the input grid from keV to internal units
+    transf = Etrans/Tcorona 				! parameter used to transform the input grid from keV to internal units
     x2_trans = x2/transf
     nestsol= mesh_size + 4
     SOLsss = n0*transf*to_phys
 
-    ! open(unit=88, file='LINLIN.dat')
-    ! do i = 1, mesh_size
-    !     write(88,*) x2(i)*6, SOLreal(i), solimag(i), SOLSSS(I)
-    ! enddo
-    ! close(88)
 
-    !fractional amplitude of the corona temperature oscillation
-    auxiliar = x2 * n0 * solution
+!---Calculation of the fractional amplitude of the corona temperature oscillation
+    auxiliar = x2 * n0 * solution * (3. / 4.) * stau * KNp_int
     CALL sco_SIMPSON(size(x2),realpart(auxiliar),x2,dTesimps1_real)
     CALL sco_SIMPSON(size(x2),imagpart(auxiliar),x2,dTesimps1_imag)
     dTesimps1 = complex(dTesimps1_real,dTesimps1_imag)
@@ -239,15 +212,12 @@ IMPLICIT NONE
     CALL sco_SIMPSON(size(x2),imagpart(auxiliar2),x2,dTesimps2_imag)
     dTesimps2 = complex(dTesimps2_real,dTesimps2_imag)
 
-    dTe = 0.
-    do i=1, size(k0)
-        dTe = dTe + (k0(i) + k1(i) * dTesimps1 + k2(i) * dTesimps2) / size(k0)
-    enddo
+    dTe = k0 + k1 * dTesimps1 + k2 * dTesimps2
     dTe_mod = cdabs(dTe)
     dTe_arg = atan2(imagpart(dTe),realpart(dTe))
 
-    ! fractional amplitude of the seed source temperature oscillation
-    auxiliar3 = auxiliar / Nescp
+!---Calculation of the fractional amplitude of the seed source temperature oscillation
+    auxiliar3 =  x2 * n0 * solution / Nescp
     CALL sco_SIMPSON(size(x2),realpart(auxiliar3),x2,dTssimps_real)
     CALL sco_SIMPSON(size(x2),imagpart(auxiliar3),x2,dTssimps_imag)
     dTssimps=complex(dTssimps_real,dTssimps_imag)
@@ -255,11 +225,10 @@ IMPLICIT NONE
     dTs_mod = cdabs(dTs)
     dTs_arg = atan2(imagpart(dTs),realpart(dTs))
 
-    Hexo0_out = 0.
-    do i=1, size(Hexo0)
-        Hexo0_out = Hexo0_out + Hexo0(i) * keV2J / (time * Etrans * size(Hexo0))   ! units : Joules per second
-    enddo
+!---Calculation of the external heating rate at thermal equilibrium
+    Hexo0_out = Hexo0 * keV2J / (time * Etrans)   ! units : Joules per second
 
+!---Interpolating splines
     CALL sco_InterpolatedUnivariateSpline(mesh_size,x2_trans,SOLsss,nestsol,Nsss,Tsss,Ssss)
     CALL sco_InterpolatedUnivariateSpline(mesh_size,x2_trans,SOLreal,nestsol,Nreal,Treal,Sreal)
     CALL sco_InterpolatedUnivariateSpline(mesh_size,x2_trans,SOLimag,nestsol,Nimag,Timag,Simag)

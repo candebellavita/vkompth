@@ -3,7 +3,7 @@ USE iso_fortran_env, ONLY : WP => REAL64
     REAL(WP) dist, mass, time, energy_norm, kbol_SI, hplanck_SI, c_SI, me_SI, sigma_SI, stau_SI, eV2J, keV2J, MeV2J, J2keV, Etrans
     REAL(WP) kbol, hplanck, c, cc2, me, sigma, stau
     REAL, PARAMETER :: PI = 4.0 * ATAN(1.0)
-    INTEGER, PARAMETER :: mesh_size = 2999 , meshlog = 299
+    INTEGER, PARAMETER :: mesh_size = 2999 , meshlog = 494
 
 CONTAINS
 SUBROUTINE sco_constants(dist, mass, time, energy_norm,  eV2J, keV2J, MeV2J, J2keV, Etrans, kbol, hplanck, c, cc2, me, sigma, stau)

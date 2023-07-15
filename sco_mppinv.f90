@@ -3,8 +3,9 @@ USE iso_fortran_env, ONLY : WP => REAL64
 IMPLICIT NONE
     INTEGER, INTENT(IN) :: N
     COMPLEX(WP), DIMENSION(N-1) :: L, U
-    COMPLEX(WP), DIMENSION(N) :: D, k1, k2, k0, sol_ongrid
+    COMPLEX(WP), DIMENSION(N) :: D, sol_ongrid, k0
     COMPLEX(WP), DIMENSION(N,N) :: A
+    COMPLEX(WP) :: k1, k2
     REAL(WP), INTENT(INOUT) :: C1(N), C2(N), p1, Q1(N), Q2(N), Q3(N), dx
     INTEGER I, J, IPIV(N), INFO, NRHS, M
     INTEGER, DIMENSION(:), ALLOCATABLE :: JJ1, JJ2
@@ -21,13 +22,13 @@ IMPLICIT NONE
         A(i+1,i) = L(I)
     enddo
 
-!    write(*,*) 'matrizzzzzzzzzzzzzzz', A
 
     DO i = 1, N
-        A(i,1) = A(i,1) - (dx / 3.) * (c1(i) * k2(i) * Q2(1) + c2(i) * p1 * Q3(1) + c1(I) * k1(i) * Q1(1))
+        A(i,1) = A(i,1) - (dx / 3.) * (c1(i) * k2 * Q2(1) + c2(i) * p1 * Q3(1) + c1(I) * k1 * Q1(1))
     ENDDO
+
     DO I = 1,N
-        A(i,N) = A(i,N) -(dx / 3.) * (c1(i) * k2(i) * Q2(N) + c2(i) * p1 * Q3(N) + c1(i) * k1(i) * Q1(N))
+        A(i,N) = A(i,N) -(dx / 3.) * (c1(i) * k2 * Q2(N) + c2(i) * p1 * Q3(N) + c1(i) * k1 * Q1(N))
     ENDDO
 
 !        DO J = 2, N-2, 2
@@ -59,8 +60,8 @@ IMPLICIT NONE
 
 
     DO I = 1, N
-      A(I, JJ1) = A(i,JJ1) - (4. * dx / 3.) * (c1(i) * k2(i) * Q2(Jj1) + c2(I) * p1 * Q3(JJ1) + c1(I) * k1(I) * Q1(JJ1))
-      A(i, JJ2) = A(i,JJ2) - (2. * dx / 3.) * (c1(I) * k2(I) * Q2(JJ2) + c2(I) * p1 * Q3(JJ2) + c1(I) * k1(I) * Q1(JJ2))
+      A(I, JJ1) = A(i,JJ1) - (4. * dx / 3.) * (c1(i) * k2 * Q2(Jj1) + c2(I) * p1 * Q3(JJ1) + c1(I) * k1 * Q1(JJ1))
+      A(i, JJ2) = A(i,JJ2) - (2. * dx / 3.) * (c1(I) * k2 * Q2(JJ2) + c2(I) * p1 * Q3(JJ2) + c1(I) * k1 * Q1(JJ2))
     ENDDO
 
     CALL ZGETRF( N, N, A, N, IPIV, INFO )

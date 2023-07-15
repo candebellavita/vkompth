@@ -55,21 +55,32 @@ SUBROUTINE vkompthdk(ear,ne,param,IFL,photar,photer)
         IF(.not.DGQFLT(ifl, 'mode')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks mode value in header.'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ELSE IF(.not.DGQFLT(ifl, 'QPO')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks QPO value in header'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ENDIF
 
         write(*,*) '     QPO frequency = ', DGFILT(ifl, 'QPO'), ' Hz'
         write(*,*) '   ======================================================='
     end if
 
-    mode = int(DGFILT(ifl, 'mode'))
+    IF(.not.DGQFLT(ifl, 'mode')) THEN
+      mode = 0
+    ELSE
+      mode = int(DGFILT(ifl, 'mode'))
+    ENDIF
+    write(*,*) 'mode = ', mode
     if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(8)
     qpo_freq = DGFILT(ifl, 'QPO')
+
+    ! If kTs<0 then, it is -kTs, and the model should return the sss
+    if (param(1).lt.0) then
+        param(1) = -param(1)
+        mode = 0
+    endif
 
     samecall = .FALSE.
     IF (pkTs.eq.param(1).and.pkTe.eq.param(2).and.pgam.eq.param(3).and.psize.eq.param(4).and. &

@@ -26,6 +26,7 @@ IMPLICIT NONE
     write(*,*) 'dTe_mod = ', dTe_mod
     write(*,*) 'dTs_mod = ', dTs_mod
     write(*,*) 'eta_int = ', eta_int
+    write(*,*) 'Hex0 =', Hexo0_out
 
     rows = 100
     ALLOCATE(bandwidth(rows,2),fracrms(rows), plag_scaled(rows), SSS_band(rows),Re_band(rows), Im_band(rows))

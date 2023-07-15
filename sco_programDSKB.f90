@@ -10,14 +10,14 @@ IMPLICIT NONE
     REAL(WP), ALLOCATABLE :: bandwidth(:,:), fracrms(:), plag_scaled(:), SSS_band(:),Re_band(:), Im_band(:)
     INTEGER :: Nsss, Nreal, Nimag, rows, dim_int
 
-    disk_size     = 10.0 !km
-    corona_size   = 7.00 !km
-    Tcorona       = 6.00 !keV
-    Tdisk         = 0.70 !keV
-    tau           = 4.00 !
-    QPO_frequency = 400. !Hz
-    DHext         = 0.05 !
-    eta_frac      = 0.40 !
+    disk_size     = 250 !km
+    corona_size   = 7100.00 !km
+    Tcorona       = 20.00 !keV
+    Tdisk         = 0.2 !keV
+    tau           = 1.30 !
+    QPO_frequency = 4.5 !Hz
+    DHext         = 0.1053 !
+    eta_frac      = 0.5 !
 
     CALL sco_MODEL_LOGdskb(disk_size, corona_size, Tcorona, Tdisk, tau, QPO_frequency, DHext, eta_frac, Nsss, Ssss,Tsss, &
       Nreal, Sreal, Treal, Nimag,Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
@@ -25,6 +25,7 @@ IMPLICIT NONE
     write(*,*) 'dTe_mod = ', dTe_mod
     write(*,*) 'dTs_mod = ', dTs_mod
     write(*,*) 'eta_int = ', eta_int
+    write(*,*) 'Hex0 =', Hexo0_out
 
     rows = 100
     ALLOCATE(bandwidth(rows,2),fracrms(rows), plag_scaled(rows), SSS_band(rows),Re_band(rows), Im_band(rows))
