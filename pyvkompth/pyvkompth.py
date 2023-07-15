@@ -33,8 +33,6 @@ def smoother(phi):
 
 
 
-
-
 kTes = [3.,50.]
 taus = [0.5,15.0]
 kTss = [0.1,2.0]
@@ -50,6 +48,7 @@ kTs = 0.2
 eta = 0.5
 size = 7100.
 qpo_freq = 4.5
+dHext = 0.1
 
 ne = 1000
 ear = np.logspace(np.log10(0.1), np.log10(50.0), ne+1)
@@ -57,9 +56,9 @@ energies = 0.5*(ear[1:]+ear[:-1])
 
 def make_plot_rms(plot):
     global kTe, size, eta, tau, kTs, qpo_freq, af
-    photar, _ = pyvkompthbb.pyvkompthbb(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af], 1)
+    photar, _, _, _, _, _ = pyvkompthbb.pyvkompthbb(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af, dHext], 1)
     plt.plot(energies, photar/(ear[1:]-ear[:-1]), lw=3, label='BB')
-    photar, _ = pyvkompthdk.pyvkompthdk(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af], 1)
+    photar, _, _, _, _, _ = pyvkompthdk.pyvkompthdk(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af, dHext], 1)
     plt.plot(energies, photar/(ear[1:]-ear[:-1]), lw=3, label='diskBB')
     plot.set_xscale('log'); plot.set_yscale('log'); #plot.set_ylim(0.001, 0.55)
     plot.set_xlabel('Energy [keV]'); plot.set_ylabel('fractional rms')
@@ -73,9 +72,9 @@ def make_plot_rms(plot):
 
 def make_plot_lag(plot):
     global kTe, size, eta, tau, kTs, qpo_freq, af
-    photar, _ = pyvkompthbb.pyvkompthbb(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af], 2)
+    photar, _, _, _, _, _ = pyvkompthbb.pyvkompthbb(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af, dHext], 2)
     plt.plot(energies, (photar/(ear[1:]-ear[:-1])), lw=3, label='BB')
-    photar, _ = pyvkompthdk.pyvkompthdk(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af], 2)
+    photar, _, _, _, _, _ = pyvkompthdk.pyvkompthdk(ear, ne, [kTs, kTe, tau, size, eta, qpo_freq, af, dHext], 2)
     plt.plot(energies, photar/(ear[1:]-ear[:-1]), lw=3, label='diskBB')
     plot.set_xscale('log'); #plot.set_ylim(-3.5,3.5)
     plot.set_ylabel('Phase Lag [rad]')

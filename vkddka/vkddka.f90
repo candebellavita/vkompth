@@ -14,13 +14,13 @@ SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION Lsize2, kTe2, kTs2, gam2, eta2, DHext2
     DOUBLE PRECISION :: tau, qpo_freq, phi, af, reflag, sss_norm
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
-    DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX+1), XM(NX)
+    DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4), X(NX+1), XM(NX), DX(NX)
     DOUBLE PRECISION :: Xmin, Xmax
 
-    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1
-    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2
-    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod,etaint1,petaint1
-    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod,etaint2,petaint2
+    DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1, dflux1
+    DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2, dflux2
+    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod,etaint1,petaint1,flux1,pflux1
+    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod,etaint2,petaint2,flux2,pflux2
 
     INTEGER Nsss, Nreal, Nimag, dim_int
     DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
@@ -40,6 +40,7 @@ SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
     DATA pdTe1mod,pdTs1mod/'dTe1_mod','dTs1_mod'/
     DATA pdTe2mod,pdTs2mod/'dTe2_mod','dTs2_mod'/
     DATA petaint1,petaint2/'eta_int1','eta_int2'/
+    DATA pflux1,pflux2/'outflux1','outflux2'/
     DATA firstcall/.true./
 
     cj = (0.0,1.0)
@@ -73,22 +74,33 @@ SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
         IF(.not.DGQFLT(ifl, 'mode')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks mode value in header.'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ELSE IF(.not.DGQFLT(ifl, 'QPO')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks QPO value in header'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ENDIF
 
         write(*,*) '     QPO frequency = ', DGFILT(ifl, 'QPO'), ' Hz'
         write(*,*) '   ====================================================================='
     end if
 
-    mode = int(DGFILT(ifl, 'mode'))
+    IF(.not.DGQFLT(ifl, 'mode')) THEN
+      mode = 0
+    ELSE
+      mode = int(DGFILT(ifl, 'mode'))
+    ENDIF
+    !write(*,*) 'mode=', mode, '  ifl=',ifl, '  ne=',ne, ' kTs=',param(1)
     if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(15)
     qpo_freq = DGFILT(ifl, 'QPO')
     samecall = .FALSE.
+
+    ! If kTs<0 then, it is -kTs, and the model should return the sss
+    if (param(1).lt.0) then
+        param(1) = -param(1)
+        mode = 0
+    endif
 
     IF (pkTs1.eq.param(1).and.pkTs2.eq.param(2).and.pkTe1.eq.param(3).and.pkTe2.eq.param(4).and. &
         pgam1.eq.param(5).and.pgam2.eq.param(6).and.pLsize1.eq.param(7).and.pLsize2.eq.param(8).and. &
@@ -262,9 +274,19 @@ SUBROUTINE vkddka(ear,ne,param,IFL,photar,photer)
     nestsol = NX + 4
     ! We now fit Splines to the solution
     XM = 0.5*(X(1:NX)+X(2:NX+1))
+    DX = X(2:NX+1)-X(1:NX)
+    SSS_bandT = SSS_bandT/DX
     CALL sco_InterpolatedUnivariateSpline(NX,XM,SSS_bandT,nestsol,Nsss,Tsss,Ssss)
     CALL sco_InterpolatedUnivariateSpline(NX,XM,Re_bandT,nestsol,Nreal,Treal,Sreal)
     CALL sco_InterpolatedUnivariateSpline(NX,XM,Im_bandT,nestsol,Nimag,Timag,Simag)
+
+    ! We obtain the total outgoing flux of each component
+    CALL sco_SIMPSON(NX,SSS_band1/DX*XM*XM,log(XM),dflux1)
+    CALL sco_SIMPSON(NX,SSS_band2/DX*XM*XM,log(XM),dflux2)
+    write(flux1,*) dflux1
+    call fpmstr(pflux1,flux1)
+    write(flux2,*) dflux2
+    call fpmstr(pflux2,flux2)
 
     ! We finally obtain the solution on the bwRef vector based on ear
     IF (ne .LT. ENEMAX) THEN

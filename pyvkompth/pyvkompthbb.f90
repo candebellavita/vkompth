@@ -1,17 +1,17 @@
-SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
+SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer, dTe_mod, dTs_mod, Hexo0_out, eta_int)
     IMPLICIT NONE
     INTEGER ifl,ne,mesh_size,i,j, ENEMAX, MAXNE
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000)
 
-    DOUBLE PRECISION ear(0:ne), param(7), photar(ne), photer(ne)
+    DOUBLE PRECISION ear(0:ne), param(8), photar(ne), photer(ne)
     DOUBLE PRECISION, save :: photrms(MAXNE), photlags(MAXNE), photsss(MAXNE), photreal(MAXNE), photimag(MAXNE)
-    DOUBLE PRECISION, save :: pkTs, pkTe, ptau, psize, peta_frac, pqpo_freq, paf
+    DOUBLE PRECISION, save :: pkTs, pkTe, ptau, psize, peta_frac, pqpo_freq, paf, pdHext
 
     DOUBLE PRECISION af, Lsize, kTe, kTs
-    DOUBLE PRECISION :: disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac
+    DOUBLE PRECISION :: disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, dHext, eta_frac
     DOUBLE PRECISION :: Tsss(mesh_size+4), Ssss(mesh_size+4), Treal(mesh_size+4), Sreal(mesh_size+4)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4)
-    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out
+    DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 
     INTEGER Nsss, Nreal, Nimag, io, rows, dim_int
 
@@ -25,7 +25,7 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
     END IF
 
     if (pkTs.eq.param(1).and.pkTe.eq.param(2).and.ptau.eq.param(3).and.psize.eq.param(4).and. &
-        peta_frac.eq.param(5).and.pqpo_freq.eq.param(6).and.paf.eq.param(7)) then
+        peta_frac.eq.param(5).and.pqpo_freq.eq.param(6).and.paf.eq.param(7).and.pdHext.eq.param(8)) then
         if (ifl.eq.1) then
             !write(*,*) 'rms...'
             photar = photrms(1:ne)
@@ -59,6 +59,7 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
         peta_frac = param(5)
         pqpo_freq = param(6)
         paf = param(7)
+        pdHext = param(8)
         !write(*,*) pkTs, pkTe, ptau, psize, peta_frac, pqpo_freq, paf
     end if
 
@@ -71,16 +72,17 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
     eta_frac = param(5)
     qpo_freq = param(6)
     af = param(7)
+    dHext = param(8)
 
     disk_size = af
     corona_size = Lsize
     Tcorona = kTe
     Tdisk = kTs
 
-    DHext = 0.10
 
-    CALL sco_MODEL_LOGbb(disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac, Nsss, Ssss,Tsss, &
-      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out)
+
+    CALL sco_MODEL_LOGbb(disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, dHext, eta_frac, Nsss, Ssss,Tsss, &
+      Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 
     IF (ne .LE. ENEMAX) THEN
         DO I= 1, ne
@@ -121,6 +123,7 @@ SUBROUTINE pyvkompthbb(ear,ne,param,IFL,photar,photer)
             END DO
         END DO
     END IF
+
 
     if (ifl.eq.1) then
         photar = photrms(1:ne)

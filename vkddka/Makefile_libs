@@ -2,8 +2,8 @@ HD_COMPONENT_NAME	= Xspec
 
 HD_COMPONENT_VERS	=
 
-LDFLAGS = -L/usr/local/include
-LDLIBS = -lopenblas
+LDFLAGS=-L/usr/local/include
+LDLIBS=-lopenblas
 
 #library definition
 
