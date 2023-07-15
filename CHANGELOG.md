@@ -1,3 +1,28 @@
+Version 1.2.0
+=============
+
+Added `dL` variant including perturbations to the size of the corona,
+electron density and optical depth, which replaces the variation in
+external-heating rate.
+
+Fixed bug in the calculation of `dkTs` and `dkTe` internal variables.
+Values in previous versions are unreliable. 
+
+Fixed insignificant bug in the application of the Klein Nishina correction.
+
+`phi` is now defined as periodic in `(-pi, pi)` in the `lmod_.dat` of dual variants.
+
+
+Version 1.1.2
+=============
+
+Added `eta_int` and `outflux` variables to `xset`
+within the XSPEC wrappers.
+
+Changed `Emin_adim` to 1e-6 and meshlog to 494 to
+keep numerical resolution.
+
+
 Version 1.1.1
 =============
 
@@ -6,6 +31,7 @@ internal value of `\tilde\eta` for each model version.
 
 Added `power` mode, to match Lorentzian normalizations
 fitted with XSPEC to the QPOs in the PDS.
+
 
 Version 1.1.0
 =============

@@ -1,0 +1,12 @@
+!    -*- f90 -*-
+python module vkdualdl ! in
+    interface  ! in :vkdualdl
+        subroutine vkdualdl(ear,ne,param,ifl,photar,photer) ! in :vkdualdl:vkdualdl.f90
+            real*8 dimension(ne + 1),intent(in),depend(ne) :: ear
+            real*8 dimension(15),intent(in) :: param
+            integer intent(in) :: ifl, ne
+            real*8 dimension(ne),intent(out),depend(ne) :: photar
+            real*8 dimension(ne),intent(out),depend(ne) :: photer
+        end subroutine vkdualdl
+    end interface
+end python module vkdualdl
