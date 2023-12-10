@@ -40,6 +40,8 @@ Alternatively, the four model variants can be loaded using the `XSPEC` script pr
 
 Examples of those can be found under the `MAXI_J1348-630` subdirectory, which correspond to data published under [Bellavita et al. 2022, MNRAS 515, 2099](https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2099B/).
 
+Under the directory `DILUTION` you can find an example of the simultaneous fit to the spectrum of the source and the rms and lag spectra of the QPO including the effect of dilution on the rms spectrum. See for instance [Ma et al. 2023, MNRAS, 525, 854](https://ui.adsabs.harvard.edu/abs/2023MNRAS.525..854M/), or [Zhang et al. 2023, MNRAS, 520, 5144](https://ui.adsabs.harvard.edu/abs/2023MNRAS.520.5144Z/) for details.
+
 
 ## Preparing your own data
 
