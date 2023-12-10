@@ -10,7 +10,7 @@ We first show below how to load the data, define and fit the model, and plot the
 We fit a 1-corona model with dilution. The procedure for a 2-corona model is very similar, except that you need to 
 use the vkdual model (see the examples in the folder MAXI_J1348-630 for that).
 
-## 1. Read the data:
+## 1. Read the data, the model and plot everything:
 
 It is convenient to load first the spectrum of the source and after that the rms and the lags. That way
 you can link new parameters in terms of the old ones, which is simpler to do in Xspec than the other way aroubnd.
@@ -21,7 +21,7 @@ Load the model:
 XSPEC12>lmod vkompthdk /full_path_to_the_directory_with_the_model/
 ```
 
-Use the `.xcm` file `@dilution1.xcm` to load the data (data 1:1 is the source spectrum, data 2:2 is the rms 
+Use the `.xcm` file `dilution1.xcm` to load the data (data 1:1 is the source spectrum, data 2:2 is the rms 
 and data 3:3 is the lags). This will define the model and give some initial values to the parameters:
 
 ```
@@ -40,7 +40,7 @@ Test statistic : Chi-Squared                  286.32     using 313 bins.
 ```
 
 Notice that the common parameters for the second and third datasets (the rms in this case) are the same as 
-(linked to) the ones of the first dataset (the spectrujm of the surce); 
+(linked to) the ones of the first dataset (the spectrum of the surce); 
 remember that the data files will contain a keyword that tells the model whether it has to output the rms 
 or lags vs. energy.
 
@@ -53,10 +53,7 @@ XSPEC12>plot 1 lda 2 lda 3 da 1 de 2 de 3 de
 
 ![figura](figure1.png)
 
-The plot shows the source spectrum (top left), and the rms (left middle) and lag (left bottom) spectra of the QPO
-with the corresponding residuals plotted on the right. (The labels of this figure are the standard Xspec abels; in reality the
-y axis of the middle left panel should be `fractional rms`, and that of the bottom left `phase lags (rad)`. You can change those, 
-for instance `setpl comm win 2; setpl comm lab y fractional rms; setpl com win 3; setpl com lab y phase lags (rad)`)
+The plot shows the source spectrum (top left), and the rms (left middle) and lag (left bottom) spectra of the QPO with the corresponding residuals plotted on the right. (The labels of this figure are the standard Xspec labels; in reality the y axis of the middle left panel should be `fractional rms`, and that of the bottom left `phase lags (rad)`. You can change those, for instance `setpl comm win 2; setpl comm lab y fractional rms; setpl com win 3; setpl com lab y phase lags (rad)`)
 
 The model includes dilution. This is defined in the `.xcm` file using the command:
 
