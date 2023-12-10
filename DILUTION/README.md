@@ -162,11 +162,11 @@ ________________________________________________________________________
 
 Notice a few things:
 
-1. All the parameters of vkompthdk are linked to the corresponding parameters of diskbb and nthcomp.
-2. The normalisation of vkompthdk is set to 0 and fixed in the first dataset (the source spectrum) and to 1 and fixed in the second and third datasets (the rms and lag spectra of the QPO). This is so because we do not want to apply vkompthdk to the spectrum of the source (we use nthcomp for that here), and we do want to use it for the rms and lag spectra of the QPO .
-3. The parameters of the dillution component are linked to the corresponding parameters of diskbb and nthcomp; however, since the dilution only applies to the rms amplitude, in the first and the third datasets (the source spectrum and the lag spectrum of the QPO) the normalisation of diskbb is set to 0 and fixed. By doing this we ensure that for those two datasets the dilution component is 1 and independent of energy. In the second dataset (rms spectrum of the QPO) **all** the parameters of the diution component are linked to the corresonding parameters of the diskbb or nthcomp components.
-4. We set NH of phabs and the normalisations of the diskbb and nthcomp components to 0 and fixed in the second and third datasets, because we do not want to apply those components to the rms and lag spectra of the QPO.
+1. All the parameters of `vkompthdk` are linked to the corresponding parameters of `diskbb` and `nthcomp`.
+2. The normalisation of `vkompthdk` is set to 0 and fixed in the first dataset (the source spectrum) and to 1 and fixed in the second and third datasets (the rms and lag spectra of the QPO). This is so because we do not want to apply `vkompthdk` to the spectrum of the source (we use `nthcomp` for that here), and we do want to use it for the rms and lag spectra of the QPO .
+3. The parameters of the `dilution` component are linked to the corresponding parameters of `diskbb` and `nthcomp`; however, since the dilution **only** applies to the rms amplitude, in the first and the third datasets (the source spectrum and the lag spectrum of the QPO) the normalisation of `diskbb` is set to 0 and fixed. By doing this we ensure that for those two datasets the `dilution` component is 1 and independent of energy. In the second dataset (rms spectrum of the QPO) **all** the parameters of the `diultion` component are linked to the corresonding parameters of the `diskbb` or `nthcomp` components.
+4. We set `NH` of `phabs` and the normalisations of the `diskbb` and `nthcomp` components to 0 and fixed in the second and third datasets, because we do not want to apply those components to the rms and lag spectra of the QPO.
 
-If you want to see the effect of the dilution, set the normalization of diskbb to 0 in the second dataset and replot. 
+If you want to see the effect of the dilution, set the normalization of `diskbb` to 0 in the second dataset and replot. 
 
 If you need help, please contact us.
