@@ -5,22 +5,24 @@ We assume that you followed the instructions and you were able to compile and lo
 If you haven't done it yet, please run first the examples in the folder MAXI_J1348-630. 
 The exmaples here are a bit more complex than those. 
 
-We provide a number of files under the subdirectory `DILUTION/` that you can use to experiment with the model. 
+We provide a number of files under the subdirectory `DILUTION/` that you can use to experiment with the model. (These are not real data, but simulated data.)
 We first show below how to load the data, define and fit the model, and plot the results. 
-We fit a 1-corona model with dilution. The procedure for a 2-corona model is very similar, excpet that you need to 
+We fit a 1-corona model with dilution. The procedure for a 2-corona model is very similar, except that you need to 
 use the vkdual model (see the examples in the folder MAXI_J1348-630 for that).
 
 ## 1. Read the data:
 
 It is convenient to load first the spectrum of the source and after that the rms and the lags. That way
-you can load new parameters in terms of the old ones, which is simpler to do in Xspec than the other way aroubnd.
+you can link new parameters in terms of the old ones, which is simpler to do in Xspec than the other way aroubnd.
+
+Load the model:
 
 ```
 XSPEC12>lmod vkompthdk /full_path_to_the_directory_with_the_model/
 ```
 
 Use the `.xcm` file `@dilution1.xcm` to load the data (data 1:1 is the source spectrum, data 2:2 is the rms 
-and data 3:3 is the lags), define the model and give some initial values to the parameters:
+and data 3:3 is the lags). This will define the model and give some initial values to the parameters:
 
 ```
 XSPEC12>@dilution1.xcm
