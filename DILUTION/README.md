@@ -2,7 +2,7 @@
 
 We assume that you followed the instructions and you were able to compile and load the model
 
-If you haven't done it yet, please run first the examples in the folder MAXI_J1348-630. 
+If you haven't done it yet, please run first the examples in the folder `MAXI_J1348-630`. 
 The exmaples here are a bit more complex than those. 
 
 We provide a number of files under the subdirectory `DILUTION/` that you can use to experiment with the model. (These are not real data, but simulated data.)
