@@ -8,7 +8,7 @@ The exmaples here are a bit more complex than those.
 We provide a number of files under the subdirectory `DILUTION/` that you can use to experiment with the model. (These are not real data, but simulated data.)
 We first show below how to load the data, define and fit the model, and plot the results. 
 We fit a 1-corona model with dilution. The procedure for a 2-corona model is very similar, except that you need to 
-use the vkdual model (see the examples in the folder MAXI_J1348-630 for that).
+use the vkdual model (see the examples in the folder `MAXI_J1348-630` for that).
 
 ## 1. Read the data, the model and plot everything:
 
