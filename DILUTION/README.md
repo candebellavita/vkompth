@@ -133,13 +133,13 @@ Model Model Component  Parameter  Unit     Value
                            Data group: 3
 49  1       phabs      nH         10^22    0.0          frozen
 50  2       diskbb     Tin        keV      0.770000     = p2
-51  2       diskbb     norm                246.000      = p3
+51  2       diskbb     norm                0.0          frozen
 52  3       nthComp    Gamma               2.64689      = p4
 53  3       nthComp    kT_e       keV      50.0000      = p5
 54  3       nthComp    kT_bb      keV      0.770000     = p6
 55  3       nthComp    inp_type   0/1      1.00000      = p7
 56  3       nthComp    Redshift            0.0          = p8
-57  3       nthComp    norm                1.79230      = p9
+57  3       nthComp    norm                0.0          frozen
 58  4       vkompthdk  kTs        keV      0.770000     = p10
 59  4       vkompthdk  kTe        keV      50.0000      = p11
 60  4       vkompthdk  gam                 2.64689      = p12
