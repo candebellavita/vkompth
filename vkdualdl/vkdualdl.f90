@@ -19,8 +19,8 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
 
     DOUBLE PRECISION :: dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1, dflux1
     DOUBLE PRECISION :: dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2, dflux2
-    character*(128) dTe1mod,dTs1mod,pdTe1mod,pdTs1mod,etaint1,petaint1,flux1,pflux1
-    character*(128) dTe2mod,dTs2mod,pdTe2mod,pdTs2mod,etaint2,petaint2,flux2,pflux2
+    character(128) dTe1mod,dTs1mod,etaint1,flux1
+    character(128) dTe2mod,dTs2mod,etaint2,flux2
 
     INTEGER Nsss, Nreal, Nimag, dim_int
     DOUBLE PRECISION bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
@@ -37,10 +37,6 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
     LOGICAL :: DGQFLT
 !    INTEGER :: DGNFLT
 
-    DATA pdTe1mod,pdTs1mod/'dTe1_mod','dTs1_mod'/
-    DATA pdTe2mod,pdTs2mod/'dTe2_mod','dTs2_mod'/
-    DATA petaint1,petaint2/'eta_int1','eta_int2'/
-    DATA pflux1,pflux2/'outflux1','outflux2'/
     DATA firstcall/.true./
 
     cj = (0.0,1.0)
@@ -94,7 +90,6 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
     if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(15)
     qpo_freq = DGFILT(ifl, 'QPO')
-    samecall = .FALSE.
 
     ! If kTs<0 then, it is -kTs, and the model should return the sss
     if (param(1).lt.0) then
@@ -102,6 +97,7 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
         mode = 0
     endif
 
+    samecall = .FALSE.
     IF (pkTs1.eq.param(1).and.pkTs2.eq.param(2).and.pkTe1.eq.param(3).and.pkTe2.eq.param(4).and. &
         pgam1.eq.param(5).and.pgam2.eq.param(6).and.pLsize1.eq.param(7).and.pLsize2.eq.param(8).and. &
         peta1.eq.param(9).and.peta2.eq.param(10).and. &
@@ -188,12 +184,15 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
     CALL sco_MODEL_LOGdskb_dL(af, Lsize1, kTe1, kTs1, tau, qpo_freq, dL1, eta1, Nsss, Ssss,Tsss, &
       Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe1_mod, dTs1_mod, dTe1_arg, dTs1_arg, Hexo01_out, eta_int1)
 
+    call PDBVAL('dTe1_mod', dTe1_mod)
     write(dTe1mod,*) dTe1_mod
-    call fpmstr(pdTe1mod,dTe1mod)
+    call fpmstr('dTe1_mod',dTe1mod)
+    call PDBVAL('dTs1_mod', dTs1_mod)
     write(dTs1mod,*) dTs1_mod
-    call fpmstr(pdTs1mod,dTs1mod)
+    call fpmstr('dTs1_mod',dTs1mod)
+    call PDBVAL('eta1_int', eta_int1)
     write(etaint1,*) eta_int1
-    call fpmstr(petaint1,etaint1)
+    call fpmstr('eta1_int',etaint1)
 
     dim_int = mesh_size+4
 
@@ -242,12 +241,15 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
     CALL sco_MODEL_LOGdskb_dL(af, Lsize2, kTe2, kTs2, tau, qpo_freq, dL2, eta2, Nsss, Ssss, &
     Tsss, Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe2_mod, dTs2_mod, dTe2_arg, dTs2_arg, Hexo02_out, eta_int2)
 
+    call PDBVAL('dTe2_mod', dTe2_mod)
     write(dTe2mod,*) dTe2_mod
-    call fpmstr(pdTe2mod,dTe2mod)
+    call fpmstr('dTe2_mod',dTe2mod)
+    call PDBVAL('dTs2_mod', dTs2_mod)
     write(dTs2mod,*) dTs2_mod
-    call fpmstr(pdTs2mod,dTs2mod)
+    call fpmstr('dTs2_mod',dTs2mod)
+    call PDBVAL('eta2_int', eta_int2)
     write(etaint2,*) eta_int2
-    call fpmstr(petaint2,etaint2)
+    call fpmstr('eta2_int',etaint2)
 
     IF (ne .LT. ENEMAX) THEN
         DO I= 1, NX
@@ -280,10 +282,13 @@ SUBROUTINE vkdualdl(ear,ne,param,IFL,photar,photer)
     ! We obtain the total outgoing flux of each component
     CALL sco_SIMPSON(NX,SSS_band1/DX*XM*XM,log(XM),dflux1)
     CALL sco_SIMPSON(NX,SSS_band2/DX*XM*XM,log(XM),dflux2)
+
+    call PDBVAL('flux1', dflux1)
     write(flux1,*) dflux1
-    call fpmstr(pflux1,flux1)
+    call fpmstr('flux1',flux1)
+    call PDBVAL('flux2', dflux2)
     write(flux2,*) dflux2
-    call fpmstr(pflux2,flux2)
+    call fpmstr('flux2',flux2)
 
     ! We finally obtain the solution on the bwRef vector based on ear
     IF (ne .LT. ENEMAX) THEN

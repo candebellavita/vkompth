@@ -1,3 +1,14 @@
+Version 1.2.1
+=============
+
+Added `PDBVAL` variables, which allow to interact through
+`tcloutr modkeyval` to obtain `eta_int` and their uncertainties
+using `simpars`.
+
+Added `etaint.tcl` and `etaint12.tcl` TCL XSPEC scripts to
+calculate `eta_int` and their uncertainties using `simpars`.
+
+
 Version 1.2.0
 =============
 

@@ -15,19 +15,16 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: Timag(mesh_size+4), Simag(mesh_size+4)
     DOUBLE PRECISION :: dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int
 
-    character*(128) dTemod,dTsmod,pdTemod,pdTsmod,etaint,petaint
+    character(128) dTemod, dTsmod, etaint
 
     INTEGER Nsss, Nreal, Nimag, dim_int, i, j, mode, neRef, ier
-    DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1)
-    DOUBLE PRECISION :: SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
+    DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     LOGICAL samecall
 
     REAL DGFILT
     LOGICAL :: DGQFLT
 !    INTEGER :: DGNFLT
 
-    DATA pdTemod,pdTsmod/'dTe_mod','dTs_mod'/
-    DATA petaint/'eta_int'/
     DATA firstcall/.true./
     !This model does not return model variances.
     photer = 0
@@ -35,8 +32,9 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     !Header
     if(firstcall)then
         write(*,*) '   ====================================================================='
-        write(*,*) '    This is vKompth VERSION time-dependent Comptonization model'
-        write(*,*) '    Bellavita, Garcia, Mendez and Karpouzas (2022) and Karpouzas+(2020).'
+        write(*,*) '    This is vKompth VERSION the time-dependent Comptonization model'
+        write(*,*) '                from Bellavita, Garcia, Mendez & Karpouzas (2022).'
+        write(*,*) '    Original models: Karpouzas+(2020) and Garcia+(2021).'
         write(*,*) '    Please cite these papers if you use this model in your publications.'
         write(*,*) '    Feel free to contact us through email or vKompth GitHub page.'
         write(*,*) '   ====================================================================='
@@ -56,21 +54,32 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
         IF(.not.DGQFLT(ifl, 'mode')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks mode value in header.'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ELSE IF(.not.DGQFLT(ifl, 'QPO')) THEN
           write(*,*) '    WARNING: Spectrum ', IFL, 'lacks QPO value in header'
           write(*,*) '             Assuming time-averaged spectrum (mode=0).'
-          return
+          mode = 0
         ENDIF
 
         write(*,*) '     QPO frequency = ', DGFILT(ifl, 'QPO'), ' Hz'
-        write(*,*) '   ======================================================='
+        write(*,*) '   ====================================================================='
     end if
 
-    mode = int(DGFILT(ifl, 'mode'))
+    IF(.not.DGQFLT(ifl, 'mode')) THEN
+      mode = 0
+    ELSE
+      mode = int(DGFILT(ifl, 'mode'))
+    ENDIF
+    !write(*,*) 'mode=', mode, '  ifl=',ifl, '  ne=',ne, ' kTs=',param(1)
     if ((mode.lt.0.99).OR.(mode.gt.6.01)) mode=0
     reflag = param(8)
     qpo_freq = DGFILT(ifl, 'QPO')
+
+    ! If kTs<0 then, it is -kTs, and the model should return the sss
+    if (param(1).lt.0) then
+        param(1) = -param(1)
+        mode = 0
+    endif
 
     samecall = .FALSE.
     IF (pkTs.eq.param(1).and.pkTe.eq.param(2).and.pgam.eq.param(3).and.psize.eq.param(4).and. &
@@ -147,12 +156,15 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     CALL sco_MODEL_LOGbb(disk_size, corona_size, Tcorona, Tdisk, tau, qpo_freq, DHext, eta_frac, Nsss, Ssss,Tsss, &
       Nreal, Sreal, Treal, Nimag, Simag, Timag, dTe_mod, dTs_mod, dTe_arg, dTs_arg, Hexo0_out, eta_int)
 
+    call PDBVAL('dTe_mod', dTe_mod)
     write(dTemod,*) dTe_mod
-    call fpmstr(pdTemod,dTemod)
+    call fpmstr('dTe_mod',dTemod)
+    call PDBVAL('dTs_mod', dTs_mod)
     write(dTsmod,*) dTs_mod
-    call fpmstr(pdTsmod,dTsmod)
+    call fpmstr('dTs_mod',dTsmod)
+    call PDBVAL('eta_int', eta_int)
     write(etaint,*) eta_int
-    call fpmstr(petaint,etaint)
+    call fpmstr('eta_int',etaint)
 
     IF (ne .LT. ENEMAX) THEN
         neRef = ne+1
