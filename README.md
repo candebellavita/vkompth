@@ -1,5 +1,7 @@
 # vKompth
 
+(It is "v-komp-t-h"; phonetically it is "viː-kʌmp-tiː-eɪʧ") 
+
 This is the Fortran version of the [vKompth](https://github.com/candebellavita/vkompth) code from [Bellavita et al. 2022, MNRAS 515, 2099](https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2099B/) which was originally developed in [Karpouzas et al. 2020, MNRAS 492, 1399](https://ui.adsabs.harvard.edu/abs/2020MNRAS.492.1399K/) and [García et al. 2021, MNRAS 501, 3173](https://ui.adsabs.harvard.edu/abs/2021MNRAS.501.3173G/).
 
 
