@@ -1,3 +1,10 @@
+Version 1.2.2
+=============
+
+Updated Makefiles with `use xsfortran` for HEASOFT v6.36,
+ensuring backward compatibility for previous HEASOFT releases.
+
+
 Version 1.2.1
 =============
 

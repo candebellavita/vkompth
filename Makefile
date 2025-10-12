@@ -1,3 +1,11 @@
+
+FVERSION := $(shell fversion 2>/dev/null || echo FAIL)
+ifeq ($(FVERSION),FAIL)
+  $(error 'fversion' not found. You should activate HEASOFT first)
+endif
+HEADASVERSION := $(shell echo $(FVERSION) | sed -E 's/.*V6\.([0-9]+).*/\1/')
+
+
 .SUFFIXES:
 FC := gfortran
 FCFLAGS := $(FCFLAGS) -O5 -Wall -fPIC
@@ -46,11 +54,19 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 #	$(FC) $(FCFLAGS) -c $<
 
 
-all: loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl makefile_libs vkompthbb vkompthdk vkdualbb vkdualdk vkdualdl vkddka vkompthdl pyvkompth
+all: fversion loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl makefile_libs vkompthbb vkompthdk vkdualbb vkdualdk vkdualdl vkddka vkompthdl pyvkompth
 
 model: vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl
 
 wrappers: loader version makefile_libs vkompthbb vkompthdk vkompthdl vkdualbb vkdualdk vkdualdl vkddka pyvkompth
+
+fversion:
+	@if [ $(HEADASVERSION) -ge 36 ]; then \
+		echo "Running HEASOFT version $(HEADASVERSION)..."; \
+		sleep 1; \
+	else \
+		echo ""; \
+	fi
 
 loader:
 	@echo "\nApply PATHTO to load_vkompth.xcm...\n"
@@ -66,26 +82,96 @@ version:
 makefile_libs:
 	@echo "\nApply LDFLAGS and LDLIBS variables to wrappers Makefile_libs files...\n"
 	cd vkompthbb; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkompthdk; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkompthdl; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkdualbb; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkdualdk; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkdualdl; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd ../vkddka ; \
-	sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
-	sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs > Makefile_libs.tmp; mv Makefile_libs.tmp Makefile_libs; \
+	if [ $(HEADASVERSION) -ge 36 ]; then \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
+		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
+		sed "2 i\ \ \ \ \use\ xsfortran" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
+		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
+		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
+	else \
+		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
+		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
+		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
+        fi; \
 	cd .. ;
 	@echo "\n   ... Done.\n\n"
 
@@ -105,25 +191,25 @@ vkompth_dl: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(LDFLAGS) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_DISKBB) $(LDLIBS) -o $@
 
 vkompthbb:
-	cd vkompthbb; initpackage vkompthbb lmod_vkompthbb.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkompthbb; initpackage vkompthbb lmod_vkompthbb.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 vkompthdk:
-	cd vkompthdk; initpackage vkompthdk lmod_vkompthdk.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkompthdk; initpackage vkompthdk lmod_vkompthdk.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 vkompthdl:
-	cd vkompthdl; initpackage vkompthdl lmod_vkompthdl.dat .; cp Makefile_libs Makefile;    hmake; cd ..
+	cd vkompthdl; initpackage vkompthdl lmod_vkompthdl.dat .; mv Makefile.temp Makefile;    hmake; cd ..
 
 vkdualbb:
-	cd vkdualbb; initpackage vkdualbb lmod_vkdualbb.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkdualbb; initpackage vkdualbb lmod_vkdualbb.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 vkdualdk:
-	cd vkdualdk; initpackage vkdualdk lmod_vkdualdk.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkdualdk; initpackage vkdualdk lmod_vkdualdk.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 vkdualdl:
-	cd vkdualdl; initpackage vkdualdl lmod_vkdualdl.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkdualdl; initpackage vkdualdl lmod_vkdualdl.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 vkddka:
-	cd vkddka; initpackage vkddka lmod_vkddka.dat .; cp Makefile_libs Makefile;	hmake; cd ..
+	cd vkddka; initpackage vkddka lmod_vkddka.dat .; mv Makefile.temp Makefile;	hmake; cd ..
 
 pyvkompth:
 	cd pyvkompth; \
