@@ -62,7 +62,7 @@ if __name__ == '__main__':
         print(' Using {} samples for output purposes'.format(Samples))
         print('===============================================')
         print()
-        _ = input(f'\nChain FITS file succesfully loaded. Press any key to continue... ')
+        _ = input(f'\nChain FITS file successfully loaded. Press any key to continue... ')
         print()
     except:
         print(f'\n\n   ERROR: Could not load {chainName} chain FITS file. Exiting... \n')
@@ -202,7 +202,7 @@ if __name__ == '__main__':
         median = np.quantile(eta_ints, 0.5)
         print('\n\n ETA_INT QUANTILES:')
         for i, quant in enumerate(quants):
-            print('  {:.3f}     {:.5f}     {:+.5f}'.format(quants[i], quantiles1[i], quantiles[i]-median))
+            print('  {:.3f}     {:.5f}     {:+.5f}'.format(quants[i], quantiles[i], quantiles[i]-median))
         print('\n')
 
     else:
