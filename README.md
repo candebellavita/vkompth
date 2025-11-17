@@ -49,6 +49,10 @@ Under the directory `DILUTION` you can find an example of the simultaneous fit t
 
 We also provide a `bash` script named `asciiTOvkompth.sh`, which uses `FTOOLS` to convert ASCII files with energy-dependent *rms*, *lags* and *time-averaged* spectra, into *PHA* and *RMF* FITS files fully compatible with our `vKompth` model variants (by including both *QPO frequency* and *mode* as *XFLT* variables for *XSPEC*).
 
+## Examples of usage
+
+We provide two examples of the usage of the software under the subdirectories [MAXI_J1348-630](MAXI_J1348-630/README.md) and [DILUTION](DILUTION/README.md).
+
 
 ## Questions, comments, issues
 
