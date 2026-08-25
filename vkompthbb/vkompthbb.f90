@@ -1,4 +1,7 @@
 SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
+#if defined(HEASOFT_GE_36)
+    use xsfortran
+#endif
     IMPLICIT NONE
     INTEGER ifl, ne, mesh_size, ENEMAX, MAXNE
     parameter(mesh_size=2999, ENEMAX=10000, MAXNE=10000)
@@ -21,9 +24,10 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     DOUBLE PRECISION :: bwRef(ne+1, 2), fracrms(ne+1), plag_scaled(ne+1), SSS_band(ne+1), Re_band(ne+1), Im_band(ne+1)
     LOGICAL samecall
 
+#if !defined(HEASOFT_GE_36)
     REAL DGFILT
     LOGICAL :: DGQFLT
-!    INTEGER :: DGNFLT
+#endif
 
     DATA firstcall/.true./
     !This model does not return model variances.
@@ -32,7 +36,7 @@ SUBROUTINE vkompthbb(ear,ne,param,IFL,photar,photer)
     !Header
     if(firstcall)then
         write(*,*) '   ====================================================================='
-        write(*,*) '    This is vKompth VERSION the time-dependent Comptonization model'
+        write(*,*) '    This is vKompth ', VKOMPTH_VER, ' the time-dependent Comptonization model'
         write(*,*) '                from Bellavita, Garcia, Mendez & Karpouzas (2022).'
         write(*,*) '    Original models: Karpouzas+(2020) and Garcia+(2021).'
         write(*,*) '    Please cite these papers if you use this model in your publications.'

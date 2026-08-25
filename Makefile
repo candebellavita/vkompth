@@ -1,24 +1,31 @@
-
 FVERSION := $(shell fversion 2>/dev/null || echo FAIL)
 ifeq ($(FVERSION),FAIL)
   $(error 'fversion' not found. You should activate HEASOFT first)
 endif
+
 HEADASVERSION := $(shell echo $(FVERSION) | sed -E 's/.*V6\.([0-9]+).*/\1/')
 
+VK_VERSION := $(shell cat VERSION 2>/dev/null || echo "1.3.0")
+
+ifeq ($(shell test $(HEADASVERSION) -ge 36 && echo yes),yes)
+  EXTRA_FFLAGS := -cpp -DHEASOFT_GE_36 -DVKOMPTH_VER='"$(VK_VERSION)"'
+else
+  EXTRA_FFLAGS := -cpp -DVKOMPTH_VER='"$(VK_VERSION)"'
+endif
 
 .SUFFIXES:
 FC := gfortran
-FCFLAGS := $(FCFLAGS) -O5 -Wall -fPIC
+FCFLAGS := $(FCFLAGS) -O5 -Wall -fPIC $(EXTRA_FFLAGS)
+PYTHON ?= python3
 LDFLAGS = -L/usr/local/include
 LDLIBS = -lopenblas
 
 OS := $(shell uname -s)
 
 DEPSDIR := ./dependencies
-
 DEPSSRC := $(shell find $(DEPSDIR)/ -name \*.f)
-XSSRC := xsbbrd.f xsdskb.f
-SCOSRC := sco_global.f90 \
+XSSRC   := xsbbrd.f xsdskb.f
+SCOSRC  := sco_global.f90 \
   sco_arrays.f90 \
   sco_simpson.f90 \
   sco_mppinv.f90 \
@@ -31,15 +38,16 @@ SCOSRC := sco_global.f90 \
   sco_model_LOG_dskb_dL.f90
 
 DEPSOBJ := $(DEPSSRC:.f=.o)
-SCOOBJ := $(SCOSRC:.f90=.o)
-XSOBJ := $(XSSRC:.f=.o)
-#SCOMOD := $(SCOSRC:.f90=.mod)
+SCOOBJ  := $(SCOSRC:.f90=.o)
+XSOBJ   := $(XSSRC:.f=.o)
 
-SRC_LIN := sco_program.f90
-SRC_LOG := sco_programLOG.f90
+SRC_LIN    := sco_program.f90
+SRC_LOG    := sco_programLOG.f90
 SRC_DISKBB := sco_programDSKB.f90
-SRC_BB := sco_program_BB.f90
-SRC_DL := sco_programDSKB_dL.f90
+SRC_BB     := sco_program_BB.f90
+SRC_DL     := sco_programDSKB_dL.f90
+
+WRAPPERS := vkompthbb vkompthdk vkompthdl vkdualbb vkdualdk vkdualdl vkddka
 
 $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 	$(FC) $(FCFLAGS) -c $< -o $@
@@ -50,130 +58,47 @@ $(DEPSDIR)/%.o: $(DEPSDIR)/%.f
 ./%.o: ./%.f90
 	$(FC) $(FCFLAGS) -c $< -o $@
 
-#./%.mod: ./%.f90
-#	$(FC) $(FCFLAGS) -c $<
-
-
-all: fversion loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl makefile_libs vkompthbb vkompthdk vkdualbb vkdualdk vkdualdl vkddka vkompthdl pyvkompth
+all: fversion loader version vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl makefile_libs $(WRAPPERS) pyvkompth
 
 model: vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl
 
-wrappers: loader version makefile_libs vkompthbb vkompthdk vkompthdl vkdualbb vkdualdk vkdualdl vkddka pyvkompth
+wrappers: loader version makefile_libs $(WRAPPERS) pyvkompth
 
 fversion:
-	@if [ $(HEADASVERSION) -ge 36 ]; then \
-		echo "Running HEASOFT version $(HEADASVERSION)..."; \
-		sleep 1; \
-	else \
-		echo ""; \
-	fi
+	@echo "Running HEASOFT version $(HEADASVERSION) (vKompth v$(VK_VERSION))..."
 
 loader:
-	@echo "\nApply PATHTO to load_vkompth.xcm...\n"
-	mv load_vkompth.xcm load_vkompth.old
-	sed "s|/PATHTO|$$(pwd)|g" load_vkompth.old > load_vkompth.xcm
-	@echo "\n   ... Done.\n\n"
+	@echo "\nGenerating load_vkompth.xcm from load_vkompth.xcm.in..."
+	@sed "s|/PATHTO|$$(pwd)|g" load_vkompth.xcm.in > load_vkompth.xcm
+	@echo "   ... Done.\n"
 
 version:
-	@echo "\nApply VERSION number $$(cat VERSION) to XSPEC model wrappers...\n"
-	for f90 in $(shell ls */*.f90); do echo $$f90; sed s/VERSION/$$(cat VERSION)/g $$f90 > $$f90.tmp; mv $$f90.tmp $$f90; done
-	@echo "\n   ... Done.\n\n"
+	@echo "\nvKompth target version: $(VK_VERSION)\n"
 
 makefile_libs:
-	@echo "\nApply LDFLAGS and LDLIBS variables to wrappers Makefile_libs files...\n"
-	cd vkompthbb; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthbb.f90 > vkompthbb.f90.tmp; mv vkompthbb.f90.tmp vkompthbb.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkompthdk; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthdk.f90 > vkompthdk.f90.tmp; mv vkompthdk.f90.tmp vkompthdk.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkompthdl; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkompthdl.f90 > vkompthdl.f90.tmp; mv vkompthdl.f90.tmp vkompthdl.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkdualbb; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualbb.f90 > vkdualbb.f90.tmp; mv vkdualbb.f90.tmp vkdualbb.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkdualdk; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualdk.f90 > vkdualdk.f90.tmp; mv vkdualdk.f90.tmp vkdualdk.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkdualdl; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkdualdl.f90 > vkdualdl.f90.tmp; mv vkdualdl.f90.tmp vkdualdl.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd ../vkddka ; \
-	if [ $(HEADASVERSION) -ge 36 ]; then \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs36 > Makefile_libs36.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs36.tmp > Makefile_libs36.temp; \
-		mv Makefile_libs36.temp Makefile.temp; rm Makefile_libs36.tmp; \
-		sed "2 i\ \ \ \ \use\ xsfortran" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
-		sed "s/\ \ \ \ REAL\ DGFILT/\!\ \ \ REAL\ DGFILT/" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
-		sed "s/\ \ \ \ LOGICAL\ \:\:\ DGQFLT/\!\ \ \ LOGICAL\ \:\:\ DGNFLT/" vkddka.f90 > vkddka.f90.tmp; mv vkddka.f90.tmp vkddka.f90; \
-	else \
-		sed "5s,.*,LDFLAGS=$(LDFLAGS)," Makefile_libs > Makefile_libs.tmp; \
-		sed "6s,.*,LDLIBS=$(LDLIBS)," Makefile_libs.tmp > Makefile_libs.temp; \
-		mv Makefile_libs.temp Makefile.temp; rm Makefile_libs.tmp; \
-        fi; \
-	cd .. ;
-	@echo "\n   ... Done.\n\n"
+	@echo "\nPreparing build configurations for XSPEC wrappers..."
+	@for dir in $(WRAPPERS); do \
+		cd $$dir; \
+		if [ $(HEADASVERSION) -ge 37 ]; then \
+			sed -e "s|^LDFLAGS=.*|LDFLAGS=$(LDFLAGS)|" \
+			    -e "s|^LDLIBS=.*|LDLIBS=$(LDLIBS)|" \
+			    -e "s| -DINITPACKAGE| -DINITPACKAGE -cpp -DHEASOFT_GE_36 -DVKOMPTH_VER='\"$(VK_VERSION)\"'|" \
+			    -e "s/ -lXS / /g" \
+			    Makefile_libs36 > Makefile.temp; \
+		elif [ $(HEADASVERSION) -eq 36 ]; then \
+			sed -e "s|^LDFLAGS=.*|LDFLAGS=$(LDFLAGS)|" \
+			    -e "s|^LDLIBS=.*|LDLIBS=$(LDLIBS)|" \
+			    -e "s| -DINITPACKAGE| -DINITPACKAGE -cpp -DHEASOFT_GE_36 -DVKOMPTH_VER='\"$(VK_VERSION)\"'|" \
+			    Makefile_libs36 > Makefile.temp; \
+		else \
+			sed -e "s|^LDFLAGS=.*|LDFLAGS=$(LDFLAGS)|" \
+			    -e "s|^LDLIBS=.*|LDLIBS=$(LDLIBS)|" \
+			    -e "s| -DINITPACKAGE| -DINITPACKAGE -cpp -DVKOMPTH_VER='\"$(VK_VERSION)\"'|" \
+			    Makefile_libs > Makefile.temp; \
+		fi; \
+		cd ..; \
+	done
+	@echo "   ... Done.\n"
 
 vkompth_lin: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(LDFLAGS) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_LIN) $(LDLIBS) -o $@
@@ -191,49 +116,53 @@ vkompth_dl: $(DEPSOBJ) $(SCOOBJ) $(XSOBJ)
 	$(FC) $(FCFLAGS) $(LDFLAGS) $(DEPSOBJ) $(SCOOBJ) $(XSOBJ) $(SRC_DISKBB) $(LDLIBS) -o $@
 
 vkompthbb:
-	cd vkompthbb; initpackage vkompthbb lmod_vkompthbb.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkompthbb && initpackage vkompthbb lmod_vkompthbb.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkompthdk:
-	cd vkompthdk; initpackage vkompthdk lmod_vkompthdk.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkompthdk && initpackage vkompthdk lmod_vkompthdk.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkompthdl:
-	cd vkompthdl; initpackage vkompthdl lmod_vkompthdl.dat .; mv Makefile.temp Makefile;    hmake; cd ..
+	cd vkompthdl && initpackage vkompthdl lmod_vkompthdl.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkdualbb:
-	cd vkdualbb; initpackage vkdualbb lmod_vkdualbb.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkdualbb && initpackage vkdualbb lmod_vkdualbb.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkdualdk:
-	cd vkdualdk; initpackage vkdualdk lmod_vkdualdk.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkdualdk && initpackage vkdualdk lmod_vkdualdk.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkdualdl:
-	cd vkdualdl; initpackage vkdualdl lmod_vkdualdl.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkdualdl && initpackage vkdualdl lmod_vkdualdl.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 vkddka:
-	cd vkddka; initpackage vkddka lmod_vkddka.dat .; mv Makefile.temp Makefile;	hmake; cd ..
+	cd vkddka && initpackage vkddka lmod_vkddka.dat . && mv Makefile.temp Makefile && hmake && cd ..
 
 pyvkompth:
 	cd pyvkompth; \
-	python -m numpy.f2py $(LDFLAGS) $(LDLIBS) -c pyvkompthbb.pyf pyvkompthbb.f90 \
+	$(PYTHON) -m numpy.f2py $(LDFLAGS) $(LDLIBS) --f90flags="$(EXTRA_FFLAGS)" -c pyvkompthbb.pyf pyvkompthbb.f90 \
 	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
 	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
 	   ../sco_model_LOGbb.f90 ../dependencies/*.f ../xsbbrd.f; \
-	python -m numpy.f2py $(LDFLAGS) $(LDLIBS) -c pyvkompthdk.pyf pyvkompthdk.f90 \
+	$(PYTHON) -m numpy.f2py $(LDFLAGS) $(LDLIBS) --f90flags="$(EXTRA_FFLAGS)" -c pyvkompthdk.pyf pyvkompthdk.f90 \
 	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
 	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
 	   ../sco_model_LOG_dskb.f90 ../dependencies/*.f ../xsdskb.f; \
-	python -m numpy.f2py $(LDFLAGS) $(LDLIBS) -c pyvkompthdl.pyf pyvkompthdl.f90 \
-       ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
-       ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
-       ../sco_model_LOG_dskb_dL.f90 ../dependencies/*.f ../xsdskb.f ; cd ..
+	$(PYTHON) -m numpy.f2py $(LDFLAGS) $(LDLIBS) --f90flags="$(EXTRA_FFLAGS)" -c pyvkompthdl.pyf pyvkompthdl.f90 \
+	   ../sco_arrays.f90 ../sco_global.f90 ../sco_band_integration.f90 \
+	   ../sco_mppinv.f90 ../sco_simpson.f90 ../sco_par.f90 \
+	   ../sco_model_LOG_dskb_dL.f90 ../dependencies/*.f ../xsdskb.f; cd ..
 
-.PHONY: clean vkompthbb vkompthdk vkdualbb vkdualdk vkdualdl vkompthdl vkddka model wrappers version pyvkompth
+.PHONY: clean vkompthbb vkompthdk vkdualbb vkdualdk vkdualdl vkompthdl vkddka model wrappers version pyvkompth fversion loader makefile_libs
+
 clean:
-	rm -f $(DEPSDIR)/*.o *.o *.mod *.dat vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl; \
-	mv load_vkompth.old load_vkompth.xcm ; \
-	cd vkompthbb; hmake clean; cd ..; cd vkompthdk; hmake clean; cd ..; \
-	cd vkompthdl; hmake clean; cd ..; 	cd vkdualdl; hmake clean; cd ..; \
-	cd vkdualbb; hmake clean;	cd ..; cd vkdualdk; hmake clean; cd ..;  \
-	cd vkddka; hmake clean; cd ..; \
-	cd pyvkompth; rm pyvkompth*cpython*; cd ..; \
-	for f90 in $(shell ls */*.f90); do echo $$f90; sed s/$$(cat VERSION)/VERSION/g $$f90 > $$f90.tmp; mv $$f90.tmp $$f90; done; \
-	echo '\n\n   FINISHED make clean all. Ready to re-compile using make. \n'
+	@rm -f $(DEPSDIR)/*.o *.o *.mod *.dat vkompth_lin vkompth_log vkompth_bb vkompth_dk vkompth_dl load_vkompth.xcm
+	@for dir in $(WRAPPERS); do \
+		if [ -d "$$dir" ]; then \
+			cd $$dir && (hmake clean >/dev/null 2>&1 || true) && \
+			rm -f Makefile Makefile.temp *.so *.o *.cxx *.h *.tcl *.mod *.bck && \
+			cd ..; \
+		fi; \
+	done
+	@if [ -d "pyvkompth" ]; then \
+		cd pyvkompth && rm -f *.so *.o *.cpython* *.pyc && cd ..; \
+	fi
+	@echo "\n   FINISHED make clean. Working tree clean. Ready to re-compile using make.\n"

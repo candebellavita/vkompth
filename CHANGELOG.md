@@ -1,3 +1,11 @@
+Version 1.3.0
+=============
+
+Updated Makefiles for HEASOFT v6.37, ensuring backward compatibility
+for previous HEASOFT releases. Code has been refactored to improve the 
+abilities of hmake for cleaner installations.
+
+
 Version 1.2.2
 =============
 
